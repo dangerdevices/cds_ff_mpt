@@ -21,7 +21,9 @@ ln_files=( "bag_config.yaml"
            "models"
            ".gitignore"
            "leBindKeys.il"
-           "pvtech.lib" )
+           "pvtech.lib"
+           "tutorial_files"
+           "start_tutorial.sh" )
 
 # user configuration files; copy
 for f in "${cp_files[@]}"; do

@@ -1,4 +1,5 @@
 # Configuration file for ipython.
+import os
 c = get_config()
 
 #------------------------------------------------------------------------------
@@ -28,8 +29,7 @@ c = get_config()
 
 ## List of files to run at IPython startup.
 c.InteractiveShellApp.exec_files = [
-    'bag_startup.py',
-#    'test.py',
+    os.path.join(os.environ['BAG_WORK_DIR'], 'bag_startup.py'),
 ]
 
 ## lines of code to run at IPython startup.
