@@ -5,9 +5,9 @@ export BAG_WORK_DIR=$(pwd)
 # set BAG framework directory
 export BAG_FRAMEWORK="$BAG_WORK_DIR/BAG_framework"
 # set BAG python executable
-# export BAG_PYTHON="/tools/projects/eeis/BAG_2.0/anaconda2/bin/python"
-# uncomment to use python 3
 export BAG_PYTHON="/tools/projects/erichang/programs/anaconda3d6/bin/python"
+# set jupyter notebook path
+export BAG_JUPYTER="/tools/projects/erichang/programs/anaconda3d6/bin/python"
 # set technology/project configuration directory
 export BAG_TECH_CONFIG_DIR="$BAG_WORK_DIR/cds_ff_mpt"
 # set where BAG saves temporary files
