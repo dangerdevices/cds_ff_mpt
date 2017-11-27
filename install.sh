@@ -21,7 +21,6 @@ ln_files=( "bag_config.yaml"
            "models"
            ".gitignore"
            "leBindKeys.il"
-           "start_jupyter.sh"
            "pvtech.lib" )
 
 # user configuration files; copy
