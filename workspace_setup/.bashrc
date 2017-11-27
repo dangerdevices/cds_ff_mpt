@@ -20,7 +20,7 @@ export PATH="${PVSHOME}/tools/bin:${PATH}"
 export PATH="${CDS_INST_DIR}/tools/plot/bin:${PATH}"
 export PATH="${CDS_INST_DIR}/tools/dfII/bin:${PATH}"
 export PATH="${CDS_INST_DIR}/tools/bin:${PATH}"
-export PATH="${MMSIN_HOME}/tools/bin:${PATH}"
+export PATH="${MMSIM_HOME}/tools/bin:${PATH}"
 
 ### Setup BAG
 source .bashrc_bag
