@@ -23,6 +23,7 @@ calibre_run
 gen_libs
 pvs_run
 cds.lib
+BAGTMP
 
 # cadence files
 .cadence
