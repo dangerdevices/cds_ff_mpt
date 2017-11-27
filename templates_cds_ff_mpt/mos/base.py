@@ -34,7 +34,7 @@ from collections import namedtuple
 
 from bag.math import lcm
 from bag.layout.util import BBox
-from bag.layout.routing import RoutingGrid, WireArray, TrackID
+from bag.layout.routing import WireArray, TrackID
 from bag.layout.routing.fill import fill_symmetric_const_space
 from bag.layout.template import TemplateBase
 
@@ -230,7 +230,6 @@ class MOSTechCDSFFMPT(MOSTech):
         mx_area_min = cls.tech_constants['mx_area_min']
         v0_sp = cls.tech_constants['v0_sp']
         md_w = cls.tech_constants['md_w']
-        vx_sp = cls.tech_constants['vx_sp']
         m2_spy_ds = cls.tech_constants['m2_spy_ds']
 
         v0_h = via_info['h'][0]
@@ -316,17 +315,27 @@ class MOSTechCDSFFMPT(MOSTech):
         return 2
 
     @classmethod
-    def draw_zero_end_row(cls):
+    def draw_zero_extension(cls):
         return True
 
     @classmethod
-    def draw_zero_extension(cls):
-        return True
+    def floating_dummy(cls):
+        return False
 
     @classmethod
     def get_dum_conn_pitch(cls):
         # type: () -> int
         return 1
+
+    @classmethod
+    def abut_analog_mos(cls):
+        # type: () -> bool
+        return True
+
+    @classmethod
+    def get_substrate_ring_lch(cls):
+        # type: () -> float
+        raise NotImplementedError('Not implemented')
 
     @classmethod
     def get_dum_conn_layer(cls):
@@ -344,7 +353,17 @@ class MOSTechCDSFFMPT(MOSTech):
         return 1
 
     @classmethod
+    def get_dig_top_layer(cls):
+        # type: () -> int
+        return 3
+
+    @classmethod
     def get_min_fg_decap(cls, lch_unit):
+        # type: (int) -> int
+        return 2
+
+    @classmethod
+    def get_min_fg_sep(cls, lch_unit):
         # type: (int) -> int
         return 2
 
@@ -362,8 +381,8 @@ class MOSTechCDSFFMPT(MOSTech):
         return ans * cls.tech_constants['resolution']
 
     @classmethod
-    def get_edge_info(cls, grid, lch_unit, guard_ring_nf, top_layer, is_end):
-        # type: (RoutingGrid, int, int, int, bool) -> Dict[str, Any]
+    def get_edge_info(cls, lch_unit, guard_ring_nf, is_end, **kwargs):
+        # type: (int, int, bool, **kwargs) -> Dict[str, Any]
 
         edge_constants = cls.get_edge_tech_constants(lch_unit)
         cpo_extx = edge_constants['cpo_extx']
@@ -379,7 +398,6 @@ class MOSTechCDSFFMPT(MOSTech):
         if 0 < guard_ring_nf < gr_nf_min:
             raise ValueError('guard_ring_nf = %d < %d' % (guard_ring_nf, gr_nf_min))
 
-        vm_pitch = grid.get_block_size(top_layer, unit_mode=True)[0]
         if is_end:
             # compute how much to shift to the right to make room
             # for implant layers enclosure, and also be fit in block pitch
@@ -387,10 +405,10 @@ class MOSTechCDSFFMPT(MOSTech):
             # compute CPO X coordinate, and whether we need to shift PO over by 1.
             left_margin = (sd_pitch - lch_unit) // 2
             max_encx = max(left_margin, cpo_extx)
-            xshift = -(-(max_encx - left_margin) // vm_pitch) * vm_pitch
-            cpo_xl = left_margin - cpo_extx + xshift
+            edge_margin = max_encx - left_margin
+            cpo_xl = min(left_margin - cpo_extx, 0)
         else:
-            xshift = cpo_xl = 0
+            edge_margin = cpo_xl = 0
 
         # compute total edge block width
         if guard_ring_nf == 0:
@@ -402,8 +420,8 @@ class MOSTechCDSFFMPT(MOSTech):
             fg_tot = outer_fg + gr_sub_fg + gr_sep_fg
 
         return dict(
-            edge_width=fg_tot * sd_pitch + xshift,
-            dx_edge=xshift,
+            edge_num_fg=fg_tot,
+            edge_margin=edge_margin,
             cpo_xl=cpo_xl,
             outer_fg=outer_fg,
             gr_sub_fg=gr_sub_fg,
@@ -436,7 +454,6 @@ class MOSTechCDSFFMPT(MOSTech):
         cpo_h = cls.tech_constants['cpo_h']
         mp_h = cls.tech_constants['mp_h']
         mx_spy_min = cls.tech_constants['mx_spy_min']
-        vx_sp = cls.tech_constants['vx_sp']
 
         mos_constants = cls.get_mos_tech_constants(lch_unit)
         sd_pitch = mos_constants['sd_pitch']
@@ -1036,6 +1053,12 @@ class MOSTechCDSFFMPT(MOSTech):
         )
 
     @classmethod
+    def get_sub_ring_ext_info(cls, sub_type, height, fg, end_ext_info, **kwargs):
+        # type: (str, int, int, ExtInfo, **kwargs) -> Dict[str, Any]
+        # TODO: add actual implementation.
+        raise NotImplementedError('Not implemented yet.')
+
+    @classmethod
     def _get_sub_m1_y(cls, lch_unit, od_yc, od_nfin):
         """Get M1 Y coordinates for substrate connection."""
         via_info = cls.get_ds_via_info(lch_unit, od_nfin)
@@ -1202,8 +1225,8 @@ class MOSTechCDSFFMPT(MOSTech):
         )
 
     @classmethod
-    def get_analog_end_info(cls, lch_unit, sub_type, threshold, fg, is_end, blk_pitch):
-        # type: (int, str, str, int, bool, int) -> Dict[str, Any]
+    def get_analog_end_info(cls, lch_unit, sub_type, threshold, fg, is_end, blk_pitch, **kwargs):
+        # type: (int, str, str, int, bool, int, **kwargs) -> Dict[str, Any]
         """Get substrate end layout information
 
         Layout is quite simple.  We draw the right CPO width, and extend PO so PO-CPO overlap
@@ -1302,12 +1325,18 @@ class MOSTechCDSFFMPT(MOSTech):
         )
 
     @classmethod
-    def get_outer_edge_info(cls, grid, guard_ring_nf, layout_info, top_layer, is_end, adj_blk_info):
-        # type: (RoutingGrid, int, Dict[str, Any], int, bool, Optional[Any]) -> Dict[str, Any]
+    def get_sub_ring_end_info(cls, sub_type, threshold, fg, end_ext_info, **kwargs):
+        # type: (str, str, int, ExtInfo, **kwargs) -> Dict[str, Any]
+        # TODO: add actual implementation
+        raise NotImplementedError('not implemented yet.')
+
+    @classmethod
+    def get_outer_edge_info(cls, guard_ring_nf, layout_info, is_end, adj_blk_info):
+        # type: (int, Dict[str, Any], bool, Optional[Any]) -> Dict[str, Any]
         lch_unit = layout_info['lch_unit']
-        edge_info = cls.get_edge_info(grid, lch_unit, guard_ring_nf, top_layer, is_end)
-        edge_xl = edge_info['dx_edge']
-        cpo_xl = min(edge_xl, edge_info['cpo_xl'])
+        edge_info = cls.get_edge_info(lch_unit, guard_ring_nf, is_end)
+        outer_fg = edge_info['outer_fg']
+        cpo_xl = edge_info['cpo_xl']
         # compute new row_info_list
         # noinspection PyProtectedMember
         row_info_list = [rinfo._replace(od_x_list=[]) for rinfo in layout_info['row_info_list']]
@@ -1317,7 +1346,7 @@ class MOSTechCDSFFMPT(MOSTech):
         imp_params = layout_info['imp_params']
         if guard_ring_nf == 0 or imp_params is None:
             # we keep all implant layers, just update left coordinate.
-            new_lay_list = [(lay, cpo_xl if lay[0] == 'CutPoly' else edge_xl, yb, yt)
+            new_lay_list = [(lay, cpo_xl if lay[0] == 'CutPoly' else 0, yb, yt)
                             for lay, _, yb, yt in lay_info_list]
         else:
             # we need to convert implant layers to substrate implants
@@ -1328,7 +1357,7 @@ class MOSTechCDSFFMPT(MOSTech):
                 sub_type = 'ptap' if mtype == 'nch' or mtype == 'ptap' else 'ntap'
                 for lay in cls.get_mos_layers(sub_type, thres):
                     cur_yb, cur_yt = imp_yb, imp_yt
-                    new_lay_list.append((lay, edge_xl, cur_yb, cur_yt))
+                    new_lay_list.append((lay, 0, cur_yb, cur_yt))
 
         # compute new adj_info_list
         adj_info_list = layout_info['adj_info_list']
@@ -1336,22 +1365,21 @@ class MOSTechCDSFFMPT(MOSTech):
             adj_blk_info = (None, [None] * len(adj_info_list))
 
         new_adj_list = []
-        fg = edge_info['outer_fg']
-        if fg > 0:
+        if outer_fg > 0:
             for adj_edge_info, adj_info in zip(adj_blk_info[1], adj_info_list):
                 if adj_edge_info is not None and (adj_edge_info.od_type == 'mos' or adj_edge_info.od_type == 'sub'):
-                    po_types = (0,) * (fg - 1) + (1,)
+                    po_types = (0,) * (outer_fg - 1) + (1,)
                 else:
-                    po_types = (0,) * fg
+                    po_types = (0,) * outer_fg
                 # noinspection PyProtectedMember
                 new_adj_list.append(adj_info._replace(po_types=po_types))
 
         # compute new fill information
         sd_pitch = layout_info['sd_pitch']
-        if fg > 0:
+        if outer_fg > 0:
             mos_constants = cls.get_mos_tech_constants(lch_unit)
             m1_w = mos_constants['mos_conn_w']
-            x_intv_list = [(edge_xl + sd_pitch - m1_w // 2, edge_xl + sd_pitch + m1_w // 2)]
+            x_intv_list = [(sd_pitch - m1_w // 2, sd_pitch + m1_w // 2)]
         else:
             x_intv_list = []
         # noinspection PyProtectedMember
@@ -1360,9 +1388,9 @@ class MOSTechCDSFFMPT(MOSTech):
         return dict(
             lch_unit=lch_unit,
             md_w=layout_info['md_w'],
-            fg=fg,
+            fg=outer_fg,
             sd_pitch=sd_pitch,
-            array_box_xl=edge_xl,
+            array_box_xl=0,
             array_box_y=layout_info['array_box_y'],
             draw_od=True,
             row_info_list=row_info_list,
@@ -1960,6 +1988,11 @@ class MOSTechCDSFFMPT(MOSTech):
             template.add_rect('M1', BBox(ds_x_start, m1_yb, ds_x_stop, m1_yt, res, unit_mode=True))
 
         template.add_pin('dummy', m1g, show=False)
+
+    @classmethod
+    def draw_decap_connection(cls, template, mos_info, sdir, ddir, gate_ext_mode, export_gate, options):
+        # type: (TemplateBase, Dict[str, Any], int, int, int, bool, Dict[str, Any]) -> None
+        raise NotImplementedError('Not implemented')
 
     @classmethod
     def _draw_g_via(cls, template, lch_unit, fg, sd_pitch, gate_yc, via_info, m3_x_list,

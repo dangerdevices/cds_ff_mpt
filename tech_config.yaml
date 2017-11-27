@@ -9,12 +9,6 @@ layout:
     dc_temp: !!int 70
     # RMS current allowable temperature increase
     rms_dt: !!int 10
-  # AnalogBase parameters
-  analog_base:
-    # minimum number of fingers separation.
-    min_fg_sep: 2
-    mconn_diff_mode: False
-    floating_dummy: False
 
 # transistor technology parameters
 mos:

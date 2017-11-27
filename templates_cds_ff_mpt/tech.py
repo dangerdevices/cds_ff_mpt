@@ -29,7 +29,7 @@ from __future__ import (absolute_import, division,
 from builtins import *
 
 import math
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 from bag.layout import TechInfo
 from bag.layout.template import TemplateBase
@@ -49,6 +49,17 @@ class TechInfoCDSFFMPT(TechInfo):
         self.irms_dt = process_params['layout']['em']['rms_dt']
 
     @classmethod
+    def get_dnw_layers(cls):
+        # type: () -> List[Tuple[str, str]]
+        raise NotImplementedError('Not implemented')
+
+    @classmethod
+    def get_dnw_margin_unit(cls, dnw_mode):
+        # type: (str) -> int
+        # TODO: update and put actual numbers here.
+        return 100
+
+    @classmethod
     def get_implant_layers(cls, mos_type, res_type=None):
         if mos_type == 'nch':
             return []
@@ -58,6 +69,11 @@ class TechInfoCDSFFMPT(TechInfo):
             return [('NW', 'drawing')]
         else:
             return [('NW', 'drawing')]
+
+    @classmethod
+    def get_res_metal_layers(cls, layer_id):
+        # type: (int) -> List[Tuple[str, str]]
+        raise NotImplementedError('Not implemented')
 
     @classmethod
     def add_cell_boundary(cls, template, box):
@@ -88,7 +104,8 @@ class TechInfoCDSFFMPT(TechInfo):
         # openaccess is bad with odd spacing.
         arr_enc = None
         arr_test = None
-        sp3 = None
+        sp2_list = None  # type: Optional[List]
+        sp3_list = None
         if vname == '1x' or vname == '4':
             if vtype == 'square':
                 sp = [42, 42]
@@ -112,7 +129,7 @@ class TechInfoCDSFFMPT(TechInfo):
             if vtype != 'square':
                 raise ValueError('Unsupported vtype %s' % vtype)
 
-            sp3 = [78, 78]
+            sp3_list = [(78, 78)]
             sp = [62, 62]
             dim = [42, 42]
             mw_enc = [(float('inf'), [(8, 8)])]
@@ -138,11 +155,17 @@ class TechInfoCDSFFMPT(TechInfo):
                 def arr_test2(nrow, ncol):
                     # noinspection PyCallingNonCallable
                     return arr_test(ncol, nrow)
-            if sp3 is not None:
-                sp3 = [sp3[1], sp3[0]]
+            if sp2_list is not None:
+                sp2_list = [(sp2[1], sp2[0]) for sp2 in sp2_list]
+            if sp3_list is not None:
+                sp3_list = [(sp3[1], sp3[0]) for sp3 in sp3_list]
 
-        return sp, sp3, dim, enc, arr_enc, arr_test2
-    
+        return sp, sp2_list, sp3_list, dim, enc, arr_enc, arr_test2
+
+    @classmethod
+    def use_flip_parity(cls):
+        return False
+
     def get_min_space(self, layer_type, width, unit_mode=False, same_color=False):
         if layer_type == '1x':
             if same_color:
