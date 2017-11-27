@@ -16,6 +16,7 @@ data
 # misc configuration/history files
 .ipython
 .jupyter
+.ipynb_checkpoints
 
 # generated files/directories
 calibre_run
