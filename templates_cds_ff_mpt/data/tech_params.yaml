@@ -251,15 +251,15 @@ dnw_margins:
 # transistor DRC rules.
 mos:
   # fin height
-  fin_h: 4
+  fin_h: 14
   # minimum horizontal space between OD, in resolution units
-  od_spx: 10
+  od_spx: 50
   # minimum vertical space between OD, in resolution units
   od_spy_min: 10
   # maximum vertical space between OD, in resolution units
-  od_spy_max: 1000
+  od_spy_max: 514
   # OD quantization pitch.
-  mos_pitch: 50
+  mos_pitch: 48
   # number of fingers in an AnalogBase row must be multiples of this number.
   analog_unit_fg: 2
   # True if zero height AnalogMosExt should be drawn.
@@ -269,7 +269,7 @@ mos:
   # True if AnalogMosConn can abut each other.
   abut_analog_mos: True
   # channel length used in substrate rings.
-  sub_ring_lch: 20.0e-9
+  sub_ring_lch: 18.0e-9
   # vertical dummy wires pitch, in routing grid tracks.
   dum_conn_pitch : 1
   # dummy connection layer.
@@ -281,16 +281,16 @@ mos:
   # LaygoBase top layer.
   dig_top_layer: 2
   # horizontal enclosure of implant layers over OD
-  imp_od_encx: 100
+  imp_od_encx: 65
   # minimum OD density
   od_min_density: 0.20
   # dummy OD height range, in number of fins
-  od_fill_h: !!python/tuple [1, 10]
+  od_fill_h: !!python/tuple [2, 20]
   # dummy OD maximum width, in resolution units.
   od_fill_w_max: !!null
   # implant layers vertical enclosure of active.
   # this is used to figure out where to separate implant layers in extension blocks,
-  imp_od_ency: 100
+  imp_od_ency: 45
   # overlap between NW layer and DNW layer.
   nw_dnw_ovl: 100
   # extension of NW layer over DNW layer.
@@ -298,39 +298,39 @@ mos:
   # horizontal extension of CPO beyond PO
   cpo_po_extx:
     lch: [.inf]
-    val: [50]
+    val: [34]
   # vertical enclosure of CPO on PO
   cpo_po_ency:
     lch: [.inf]
-    val: [50]
+    val: [34]
   # CPO to OD spacing
   cpo_od_sp:
     lch: [.inf]
-    val: [50]
+    val: [20]
   # CPO to CPO vertical spacing
   cpo_spy:
     lch: [.inf]
-    val: [10]
+    val: [90]
   # normal CPO height
   cpo_h:
     lch: [.inf]
-    val: [10]
+    val: [60]
   # MD width
   md_w:
     lch: [.inf]
-    val: [10]
+    val: [40]
   # vertical extension of MD over OD
   md_od_exty:
     lch: [.inf]
-    val: [10]
+    val: [20]
   # vertical space bewteen MD
   md_spy:
     lch: [.inf]
-    val: [10]
+    val: [46]
   # minimum height of MD
   md_h_min:
     lch: [.inf]
-    val: [10]
+    val: [68]
   # Minimum number of fingers for decap connection.
   min_fg_decap:
     lch: [.inf]
@@ -350,12 +350,12 @@ mos:
   # minimum number of fingers in outer edge block.
   fg_outer_min:
     lch: [.inf]
-    val: [1]
+    val: [3]
   # source/drain pitch related constants.
   # source/drain pitch is computed as val[0] + val[1] * lch_unit
   sd_pitch_constants:
     lch: [.inf]
-    val: [[10, 1]]
+    val: [[90, 0]]
   # number of source/drain junction per vertical track.
   num_sd_per_track:
     lch: [.inf]

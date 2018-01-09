@@ -1,72 +1,19 @@
 # -*- coding: utf-8 -*-
-########################################################################################################################
-#
-# Copyright (c) 2014, Regents of the University of California
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
-# following conditions are met:
-#
-# 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
-#   disclaimer.
-# 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
-#    following disclaimer in the documentation and/or other materials provided with the distribution.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-########################################################################################################################
 
-from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
-# noinspection PyUnresolvedReferences,PyCompatibility
-from builtins import *
+from abs_templates_ec.analog_mos.finfet import MOSTechFinfetBase
 
-from abs_templates_ec.analog_mos.core import MOSTech
-
-from typing import Dict, Any, Union, List, Optional
-from collections import namedtuple
+from typing import TYPE_CHECKING, Dict, Any, Union, List, Optional
 
 from bag.math import lcm
 from bag.layout.util import BBox
-from bag.layout.routing import WireArray, TrackID
-from bag.layout.routing.fill import fill_symmetric_const_space
 from bag.layout.template import TemplateBase
 
-ExtInfo = namedtuple('ExtInfo', ['mx_margin', 'od_margin', 'md_margin', 'm1_margin', 'imp_min_w',
-                                 'mtype', 'thres', 'po_types', 'edgel_info', 'edger_info'])
-RowInfo = namedtuple('RowInfo', ['od_x_list', 'od_y', 'od_type', 'po_y', 'md_y'])
-AdjRowInfo = namedtuple('AdjRowInfo', ['po_y', 'po_types'])
-EdgeInfo = namedtuple('EdgeInfo', ['od_type'])
-FillInfo = namedtuple('FillInfo', ['layer', 'exc_layer', 'x_intv_list', 'y_intv_list'])
+if TYPE_CHECKING:
+    from bag.layout.tech import TechInfoConfig
 
 
-def _to_warr(warr_list):
-    if len(warr_list) == 1:
-        return warr_list[0]
-
-    layer = warr_list[0].track_id.layer_id
-    lower, upper = warr_list[0].lower, warr_list[0].upper
-    base_idx = warr_list[0].track_id.base_index
-    pitch = warr_list[1].track_id.base_index - base_idx
-    return WireArray(TrackID(layer, base_idx, num=len(warr_list), pitch=pitch), lower, upper)
-
-
-class MOSTechCDSFFMPT(MOSTech):
+class MOSTechCDSFFMPT(MOSTechFinfetBase):
     tech_constants = dict(
-        # layout unit length in meters
-        layout_unit=1e-6,
-        # layout resolution
-        resolution=0.001,
-        # fin height.
-        fin_h=14,
-        # fin pitch.
-        fin_pitch=48,
         # space between MP and CPO
         mp_cpo_sp=19,
         # MP height
@@ -77,42 +24,12 @@ class MOSTechCDSFFMPT(MOSTech):
         mp_md_sp=13,
         # vertical space between adjacent MP
         mp_spy=34,
-        # MD width
-        md_w=40,
-        # MD space
-        md_sp=46,
         # space between MD and OD
         md_od_spy=40,
-        # extension of MD over OD
-        md_od_exty=20,
-        # minimum MD height
-        md_h_min=68,
         # space between VIA0
         v0_sp=32,
         # space between VIA1X
         vx_sp=42,
-        # CPO height
-        cpo_h=60,
-        # space between CPO and OD
-        cpo_od_sp=20,
-        # minimum CPO vertical space
-        cpo_spy=90,
-        # enclosure of CPO over PO
-        cpo_po_ency=34,
-        # maximum space between OD in fin pitch.
-        od_sp_nfin_max=11,
-        # minimum number of fins in OD
-        od_nfin_min=2,
-        # maximum number of fins in OD
-        od_nfin_max=20,
-        # minimum number of fingers for dummy OD
-        dum_od_fg_min=2,
-        # finger space between dummy OD
-        dum_od_fg_space=2,
-        # vertical enclosure of PP/NP/NW over OD
-        imp_od_ency=45,
-        # horizontal enclosure of PP/NP/NW over OD
-        imp_od_encx=65,
         # minimum PP/NP width.
         imp_wmin=52,
         # minimum M1X area
@@ -133,39 +50,9 @@ class MOSTechCDSFFMPT(MOSTech):
         m2_spy_ds=48,
     )
 
-    @classmethod
-    def get_mos_layers(cls, mos_type, threshold):
-        """Returns a list of implant/well/threshold layers.
-
-        Parameters
-        ----------
-        mos_type : str
-            the transistor type.  Valid values are 'pch', 'nch', 'ntap', and 'ptap'.
-        threshold : str
-            the threshold flavor.
-
-        Returns
-        -------
-        layer_list : list[Tuple[str, str]]
-            a list of implant/well/threshold layer names.
-        """
-        lay_list = [('FinArea', 'fin48')]
-        if mos_type == 'pch' or mos_type == 'ntap':
-            lay_list.append(('NWell', 'drawing'))
-
-        mtype = 'P' if mos_type == 'pch' or mos_type == 'ptap' else 'N'
-
-        if threshold == 'lvt' or threshold == 'fast':
-            thres = '%slvt' % mtype
-        elif threshold == 'svt' or threshold == 'standard':
-            thres = '%ssvt' % mtype
-        elif threshold == 'hvt' or threshold == 'low_power':
-            thres = '%shvt' % mtype
-        else:
-            raise Exception('Unrecognized threshold %s' % threshold)
-
-        lay_list.append((thres, 'drawing'))
-        return lay_list
+    def __init__(self, config, tech_info):
+        # type: (Dict[str, Any], TechInfoConfig) -> None
+        MOSTechFinfetBase.__init__(self, config, tech_info)
 
     @classmethod
     def get_gate_via_info(cls, lch_unit):
@@ -268,165 +155,6 @@ class MOSTechCDSFFMPT(MOSTech):
         via_info['m3_h'] = m3_h
 
         return via_info
-
-    @classmethod
-    def get_edge_tech_constants(cls, lch_unit):
-
-        imp_od_encx = cls.tech_constants['imp_od_encx']
-
-        mos_constants = cls.get_mos_tech_constants(lch_unit)
-        sd_pitch = mos_constants['sd_pitch']
-
-        # calculate number of fingers needed around OD To satisfy implant enclosure rule
-        od_fg_margin = -(-(imp_od_encx - (sd_pitch - lch_unit) // 2) // sd_pitch)
-
-        constants = dict(
-            gr_nf_min=2,
-            outer_fg=3,
-            gr_outer_fg=0,
-            gr_sub_fg_margin=od_fg_margin,
-            gr_sep_fg=od_fg_margin + 1,
-        )
-
-        constants['cpo_extx'] = 34
-
-        return constants
-
-    @classmethod
-    def get_mos_tech_constants(cls, lch_unit):
-        # type: (int) -> Dict[str, Any]
-        if lch_unit == 18:
-            constants = dict(
-                sd_pitch=90,
-            )
-        else:
-            raise ValueError('Unsupported channel length: %d' % lch_unit)
-
-        constants['laygo_num_sd_per_track'] = constants['num_sd_per_track'] = 1
-
-        # set MD related parameters
-        md_w = cls.tech_constants['md_w']
-        constants['laygo_conn_w'] = constants['mos_conn_w'] = constants['dum_conn_w'] = constants['m1_w'] = md_w
-        return constants
-
-    @classmethod
-    def get_analog_unit_fg(cls):
-        # type: () -> int
-        return 2
-
-    @classmethod
-    def draw_zero_extension(cls):
-        return True
-
-    @classmethod
-    def floating_dummy(cls):
-        return False
-
-    @classmethod
-    def get_dum_conn_pitch(cls):
-        # type: () -> int
-        return 1
-
-    @classmethod
-    def abut_analog_mos(cls):
-        # type: () -> bool
-        return True
-
-    @classmethod
-    def get_substrate_ring_lch(cls):
-        # type: () -> float
-        raise NotImplementedError('Not implemented')
-
-    @classmethod
-    def get_dum_conn_layer(cls):
-        # type: () -> int
-        return 1
-
-    @classmethod
-    def get_mos_conn_layer(cls):
-        # type: () -> int
-        return 3
-
-    @classmethod
-    def get_dig_conn_layer(cls):
-        # type: () -> int
-        return 1
-
-    @classmethod
-    def get_dig_top_layer(cls):
-        # type: () -> int
-        return 3
-
-    @classmethod
-    def get_min_fg_decap(cls, lch_unit):
-        # type: (int) -> int
-        return 2
-
-    @classmethod
-    def get_min_fg_sep(cls, lch_unit):
-        # type: (int) -> int
-        return 2
-
-    @classmethod
-    def get_tech_constant(cls, name):
-        # type: (str) -> Any
-        return cls.tech_constants[name]
-
-    @classmethod
-    def get_mos_pitch(cls, unit_mode=False):
-        # type: (bool) -> Union[float, int]
-        ans = cls.tech_constants['fin_pitch']
-        if unit_mode:
-            return ans
-        return ans * cls.tech_constants['resolution']
-
-    @classmethod
-    def get_edge_info(cls, lch_unit, guard_ring_nf, is_end, **kwargs):
-        # type: (int, int, bool, **kwargs) -> Dict[str, Any]
-
-        edge_constants = cls.get_edge_tech_constants(lch_unit)
-        cpo_extx = edge_constants['cpo_extx']
-        gr_nf_min = edge_constants['gr_nf_min']
-        outer_fg = edge_constants['outer_fg']
-        gr_outer_fg = edge_constants['gr_outer_fg']
-        gr_sub_fg_margin = edge_constants['gr_sub_fg_margin']
-        gr_sep_fg = edge_constants['gr_sep_fg']
-
-        mos_constants = cls.get_mos_tech_constants(lch_unit)
-        sd_pitch = mos_constants['sd_pitch']
-
-        if 0 < guard_ring_nf < gr_nf_min:
-            raise ValueError('guard_ring_nf = %d < %d' % (guard_ring_nf, gr_nf_min))
-
-        if is_end:
-            # compute how much to shift to the right to make room
-            # for implant layers enclosure, and also be fit in block pitch
-
-            # compute CPO X coordinate, and whether we need to shift PO over by 1.
-            left_margin = (sd_pitch - lch_unit) // 2
-            max_encx = max(left_margin, cpo_extx)
-            edge_margin = max_encx - left_margin
-            cpo_xl = min(left_margin - cpo_extx, 0)
-        else:
-            edge_margin = cpo_xl = 0
-
-        # compute total edge block width
-        if guard_ring_nf == 0:
-            fg_tot = outer_fg
-            gr_sub_fg = 0
-        else:
-            outer_fg = gr_outer_fg
-            gr_sub_fg = guard_ring_nf + 2 + 2 * gr_sub_fg_margin
-            fg_tot = outer_fg + gr_sub_fg + gr_sep_fg
-
-        return dict(
-            edge_num_fg=fg_tot,
-            edge_margin=edge_margin,
-            cpo_xl=cpo_xl,
-            outer_fg=outer_fg,
-            gr_sub_fg=gr_sub_fg,
-            gr_sep_fg=gr_sep_fg,
-        )
 
     @classmethod
     def get_mos_info(cls, lch_unit, w, mos_type, threshold, fg, **kwargs):
