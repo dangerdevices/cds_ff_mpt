@@ -63,17 +63,24 @@ layer_name:
 # mapping from metal layer name to metal layer type.  The layer type
 # is used to figure out which EM rules to use.
 layer_type:
-  M1: x
-  M2: x
-  M3: x
+  LiPo: LiPo
+  LiAct: LiAct
+  M1: 1x
+  M2: 1x
+  M3: 1x
+  M4: '4'
+  M5: 2x
+  M6: 2x
 
 # mapping from via bottom layer ID to via name.  Via name is used
 # to figure out enclosure rules.
 via_name:
-  0: vo
-  1: vx
-  2: vx
-  3: vx
+  0: 1x
+  1: 1x
+  2: 1x
+  3: '4'
+  4: 2x
+  5: 2x
 
 # mapping from tuple of via layers to via ID.
 via_id:
