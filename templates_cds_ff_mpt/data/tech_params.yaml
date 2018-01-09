@@ -135,30 +135,6 @@ via:
           - [[12, 9]]
           - [[10, 10]]
           - [[10, 0]]
-  2x:
-    square:
-      dim: [42, 42]
-      sp: [62, 62]
-      sp2: [!!python/tuple [62, 62]]
-      sp3: [!!python/tuple [78, 78]]
-      bot_enc:
-      top_enc:
-        w_list: [.inf]
-        enc_list:
-          - [[8, 8]]
-    hrect:
-      dim: [64, 32]
-      sp: [42, 42]
-      sp2: [!!python/tuple [42, 42]]
-      sp3: [!!python/tuple [42, 42]]
-      bot_enc:
-      top_enc:
-        w_list: [49, 51, 105, .inf]
-        enc_list:
-          - [[20, 0]]
-          - [[12, 9]]
-          - [[10, 10]]
-          - [[10, 0]]
   '4':
     square:
       dim: [32, 32]
@@ -187,29 +163,84 @@ via:
           - [[12, 9]]
           - [[10, 10]]
           - [[10, 0]]
+  2x:
+    square:
+      dim: [42, 42]
+      sp: [62, 62]
+      sp2: [!!python/tuple [62, 62]]
+      sp3: [!!python/tuple [78, 78]]
+      bot_enc:
+      top_enc:
+        w_list: [.inf]
+        enc_list:
+          - [[8, 8]]
+    hrect:
+      dim: [64, 32]
+      sp: [42, 42]
+      sp2: [!!python/tuple [42, 42]]
+      sp3: [!!python/tuple [42, 42]]
+      bot_enc:
+      top_enc:
+        w_list: [49, 51, 105, .inf]
+        enc_list:
+          - [[20, 0]]
+          - [[12, 9]]
+          - [[10, 10]]
+          - [[10, 0]]
 
 # minimum wire spacing rule.  Space is measured orthogonal to wire direction.
 sp_min:
-  # metal layer type
   1x:
-    # wire spacing as function of wire width.  sp_list[idx] is used if
-    # wire width is less than or equal to w_list[idx]
-    w_list: [10, 20, .inf]
-    sp_list: [10, 20, 30]
+    w_list: [.inf]
+    sp_list: [32]
+  '4':
+    w_list: [99, 749, 1499, .inf]
+    sp_list: [48, 72, 112, 220]
+  2x:
+    w_list: [59, 89, .inf]
+    sp_list: [68, 80, 100]
+
+# minimum wire spacing rule for same color wires.
+sp_sc_min:
+  1x:
+    w_list: [99, 749, 1499, .inf]
+    sp_list: [48, 72, 112, 220]
+  '4':
+    w_list: [99, 749, 1499, .inf]
+    sp_list: [48, 72, 112, 220]
+  2x:
+    w_list: [59, 89, .inf]
+    sp_list: [68, 80, 100]
 
 # minimum line-end spacing rule.  Space is measured parallel to wire direction.
 sp_le_min:
-  x:
-    w_list: [10, 20, .inf]
-    sp_list: [20, 30, 40]
+  1x:
+    w_list: [.inf]
+    sp_list: [64]
+  '4':
+    w_list: [.inf]
+    sp_list: [64]
+  2x:
+    w_list: [.inf]
+    sp_list: [74]
 
 # minimum length/minimum area rules.
 len_min:
-  x:
-    w_list: [10, 20, .inf]
-    w_al_list: [[1000, 10], [2000, 20], [3000, 30]]
-    md_list: [10, 20, .inf]
-    md_al_list: [[3000, 10], [2000, 20], [1000, 30]]
+  1x:
+    w_list: [.inf]
+    w_al_list: [[6176, 10]]
+    md_list: [.inf]
+    md_al_list: [[6176, 10]]
+  '4':
+    w_list: [.inf]
+    w_al_list: [[6176, 10]]
+    md_list: [.inf]
+    md_al_list: [[6176, 10]]
+  2x:
+    w_list: [.inf]
+    w_al_list: [[8200, 10]]
+    md_list: [.inf]
+    md_al_list: [[8200, 10]]
 
 # DNW margin rules.
 dnw_margins:

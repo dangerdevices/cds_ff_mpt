@@ -1,34 +1,5 @@
 # -*- coding: utf-8 -*-
-########################################################################################################################
-#
-# Copyright (c) 2014, Regents of the University of California
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
-# following conditions are met:
-#
-# 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
-#   disclaimer.
-# 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
-#    following disclaimer in the documentation and/or other materials provided with the distribution.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-########################################################################################################################
 
-
-from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
-# noinspection PyUnresolvedReferences,PyCompatibility
-from builtins import *
-
-import math
 from typing import TYPE_CHECKING, List, Tuple, Optional, Callable
 
 from bag.layout.tech import TechInfoConfig
@@ -54,6 +25,7 @@ class TechInfoCDSFFMPT(TechInfoConfig):
         ipeak = float('inf')
         return idc, irms, ipeak
 
+    # noinspection PyUnusedLocal
     def _get_metal_idc_factor(self, mtype, w, l):
         return 1
 
@@ -66,6 +38,7 @@ class TechInfoCDSFFMPT(TechInfoConfig):
         idc_temp = kwargs.get('dc_temp', self.idc_temp)
         return self.get_idc_scale_factor(idc_temp, metal_type) * idc * 1e-3
 
+    # noinspection PyUnusedLocal
     def _get_metal_irms(self, layer_name, w, **kwargs):
         b = 0.0443
         k, wo, a = 6.0, 0.0, 0.2
@@ -85,6 +58,7 @@ class TechInfoCDSFFMPT(TechInfoConfig):
         ipeak = float('inf')
         return idc, irms, ipeak
 
+    # noinspection PyUnusedLocal
     def _get_via_idc(self, vname, via_type, bm_type, tm_type,
                      bm_dim, tm_dim, array, **kwargs):
         if bm_dim[0] > 0:
@@ -139,72 +113,3 @@ class TechInfoCDSFFMPT(TechInfoConfig):
     def get_via_arr_enc(self, vname, vtype, mtype, mw_unit, is_bot):
         # type: (...) -> Tuple[Optional[List[Tuple[int, int]]], Optional[Callable[[int, int], bool]]]
         return None, None
-
-    def get_min_space(self, layer_type, width, unit_mode=False, same_color=False):
-        if layer_type == '1x':
-            if same_color:
-                w_list = [1499, 749, 99]
-                sp_list = [220, 112, 72]
-                sp_default = 48
-            else:
-                w_list = sp_list = []
-                sp_default = 32
-        elif layer_type == '4':
-            w_list = [1499, 749, 99]
-            sp_list = [220, 112, 72]
-            sp_default = 48
-        elif layer_type == '2x':
-            w_list = [89, 59]
-            sp_list = [100, 80]
-            sp_default = 68
-        else:
-            raise ValueError('Unsupported layer type: %s' % layer_type)
-
-        if not unit_mode:
-            width = int(round(width / self.resolution))
-
-        ans = sp_default
-        for w, sp in zip(w_list, sp_list):
-            if width > w:
-                ans = sp
-                break
-
-        if unit_mode:
-            return ans
-        else:
-            return ans * self.resolution
-
-    def get_min_line_end_space(self, layer_type, width, unit_mode=False):
-        if layer_type == '1x':
-            w_list = sp_list = []
-            sp_default = 64
-        elif layer_type == '4':
-            w_list = sp_list = []
-            sp_default = 64
-        elif layer_type == '2x':
-            w_list = sp_list = []
-            sp_default = 74
-        else:
-            raise ValueError('Unsupported layer type: %s' % layer_type)
-
-        if not unit_mode:
-            width = int(round(width / self.resolution))
-
-        ans = sp_default
-        for w, sp in zip(w_list, sp_list):
-            if width > w:
-                ans = sp
-
-        if unit_mode:
-            return ans
-        else:
-            return ans * self.resolution
-
-    def get_min_length(self, layer_type, width):
-        res = self.resolution
-        if layer_type == '1x' or layer_type == '4':
-            return math.ceil(0.006176 / width / res) * res
-        elif layer_type == '2x':
-            return math.ceil(0.0082 / width / res) * res
-        else:
-            raise ValueError('Unsupported layer type: %s' % layer_type)
