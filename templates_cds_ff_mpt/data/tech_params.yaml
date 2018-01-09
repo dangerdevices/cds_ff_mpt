@@ -295,6 +295,16 @@ mos:
   nw_dnw_ovl: 100
   # extension of NW layer over DNW layer.
   nw_dnw_ext: 100
+  # space between MP and CPO
+  mp_cpo_sp: 19
+  # MP height
+  mp_h: 40
+  # MP and PO overlap
+  mp_po_ovl: 16
+  # space bewteen MP and MD
+  mp_md_sp: 13
+  # vertical space between MP
+  mp_spy: 34
   # horizontal extension of CPO beyond PO
   cpo_po_extx:
     lch: [.inf]
@@ -367,21 +377,21 @@ mos:
   # gate via parameters
   via_g:
     dim:
-      - [10, 10]
-      - [10, 10]
-      - [10, 10]
-    sp: [10, 10, 10]
-    bot_enc_le: [10, 10, 10]
-    top_enc_le: [10, 10, 10]
+      - [32, 32]
+      - [32, 32]
+      - [32, 32]
+    sp: [32, 42, 42]
+    bot_enc_le: [18, 40, 34]
+    top_enc_le: [40, 34, 40]
   # drain/source via parameters
   via_d:
     dim:
-      - [10, 10]
-      - [10, 10]
-      - [10, 10]
-    sp: [10, 10, 10]
-    bot_enc_le: [10, 10, 10]
-    top_enc_le: [10, 10, 10]
+      - [32, 32]
+      - [32, 64]
+      - [32, 64]
+    sp: [32, 42, 42]
+    bot_enc_le: [18, 20, 10]
+    top_enc_le: [40, 10, 20]
   # DNW layer names
   dnw_layers:
     - !!python/tuple [dnw, drawing]

@@ -14,16 +14,6 @@ if TYPE_CHECKING:
 
 class MOSTechCDSFFMPT(MOSTechFinfetBase):
     tech_constants = dict(
-        # space between MP and CPO
-        mp_cpo_sp=19,
-        # MP height
-        mp_h=40,
-        # MP and PO overlap
-        mp_po_ovl=16,
-        # space between MP and MD
-        mp_md_sp=13,
-        # vertical space between adjacent MP
-        mp_spy=34,
         # space between MD and OD
         md_od_spy=40,
         # space between VIA0
@@ -54,153 +44,27 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         # type: (Dict[str, Any], TechInfoConfig) -> None
         MOSTechFinfetBase.__init__(self, config, tech_info)
 
-    @classmethod
-    def get_gate_via_info(cls, lch_unit):
-        # type: (int) -> Dict[str, Any]
-        """Get gate via information"""
-        via_info = dict(
-            # gate via height
-            h=[32, 32, 32],
-            # gate via width
-            w=[32, 32, 32],
-            # bottom metal horizontal enclosure
-            bot_encx=[18, 4, 34],
-            # bottom metal vertical enclosure
-            bot_ency=[4, 40, 2],
-            # top metal horizontal enclosure
-            top_encx=[4, 34, 4],
-            # top metal vertical enclosure
-            top_ency=[40, 2, 40],
-        )
-
-        mx_area_min = cls.tech_constants['mx_area_min']
-        md_w = cls.tech_constants['md_w']
-
-        v0_h, v1_h, v2_h = via_info['h']
-        v0_m1_ency, v1_m2_ency, v2_m3_ency = via_info['top_ency']
-
-        mx_h_min = -(-mx_area_min // md_w)  # type: int
-        m1_h = max(v0_h + 2 * v0_m1_ency, mx_h_min)
-        m2_h = v1_h + 2 * v1_m2_ency
-        m3_h = max(v2_h + 2 * v2_m3_ency, mx_h_min)
-
-        via_info['m1_h'] = m1_h
-        via_info['m2_h'] = m2_h
-        via_info['m3_h'] = m3_h
-
-        return via_info
-
-    @classmethod
-    def get_ds_via_info(cls, lch_unit, w, compact=False):
-        # type: (int, int) -> Dict[str, Any]
-        """Get drain_source via information"""
-        via_info = dict(
-            # gate via height
-            h=[32, 64, 64],
-            # gate via width
-            w=[32, 32, 32],
-            # bottom metal horizontal enclosure
-            bot_encx=[3, 4, 10],
-            # bottom metal vertical enclosure
-            bot_ency=[18, 20, 10],
-            # top metal horizontal enclosure
-            top_encx=[4, 10, 4],
-            # top metal vertical enclosure
-            top_ency=[40, 10, 20],
-        )
-
-        # compute number of V0s and height of various metals
-        fin_h = cls.tech_constants['fin_h']
-        fin_p = cls.tech_constants['fin_pitch']
-        md_od_exty = cls.tech_constants['md_od_exty']
-        md_h_min = cls.tech_constants['md_h_min']
-        mx_area_min = cls.tech_constants['mx_area_min']
-        v0_sp = cls.tech_constants['v0_sp']
-        md_w = cls.tech_constants['md_w']
-        m2_spy_ds = cls.tech_constants['m2_spy_ds']
-
-        v0_h = via_info['h'][0]
-        v0_md_ency = via_info['bot_ency'][0]
-        v0_m1_ency = via_info['top_ency'][0]
-        od_h = (w - 1) * fin_p + fin_h
-        md_h = max(od_h + 2 * md_od_exty, md_h_min)
-        num_v0 = (md_h - v0_md_ency * 2 + v0_sp) // (v0_sp + v0_h)
-
-        # M1 height based on V0 enclosure
-        v0_harr = num_v0 * (v0_h + v0_sp) - v0_sp
-        m1_h = v0_harr + 2 * v0_m1_ency
-
-        # M1 height based on the fact that we need to fit two M2 wires
-        v1_h = via_info['h'][1]
-        v1_m1_ency = via_info['bot_ency'][1]
-        v1_m2_ency = via_info['top_ency'][1]
-        m2_h = v1_h + 2 * v1_m2_ency
-
-        m1_h = max(m1_h, 2 * v1_m1_ency + 2 * v1_h + 2 * v1_m2_ency + m2_spy_ds)
-
-        # make sure M1 passes minimum area rule
-        mx_h_min = -(-mx_area_min // md_w)  # type: int
-        m1_h = max(m1_h, mx_h_min)
-
-        # get M3 height
-        v2_h = via_info['h'][2]
-        v2_m3_ency = via_info['top_ency'][2]
-
-        m3_h = max(v2_h + 2 * v2_m3_ency, mx_h_min)
-
-        via_info['num_v0'] = num_v0
-        via_info['md_h'] = md_h
-        via_info['m1_h'] = m1_h
-        via_info['m2_h'] = m2_h
-        via_info['m3_h'] = m3_h
-
-        return via_info
-
-    @classmethod
-    def get_mos_info(cls, lch_unit, w, mos_type, threshold, fg, **kwargs):
+    def get_mos_yloc_info(self, lch_unit, w, mos_type, threshold, fg, **kwargs):
         # type: (int, int, str, str, int, **kwargs) -> Dict[str, Any]
-        """A single row of transistor, which enough margin to draw gate/drain via.
 
-        Strategy:
+        mos_constants = self.get_mos_tech_constants(lch_unit)
+        fin_h = mos_constants['fin_h']
+        fin_p = mos_constants['mos_pitch']
 
-        1. from CPO-M0PO spacing, get gate M0PO/M1 location
-        #. get OD location such that:
-           i. OD is in the center of drain/source M1 contact.
-           #. gate-drain M1 spacing is satisfied.
-        #. round OD location to fin grid, get M0OD/M1 coordinates.
-        #. update gate M0PO/M1 location so that gate-drain M1 spacing equals minimum.
-        #. find top CPO location from OD-CPO spacing.
-        #. compute gate/drain/source M3 locations.
-        #. compute extension information, then return layout information dictionary.
-        """
-
-        fin_h = cls.tech_constants['fin_h']
-        fin_p = cls.tech_constants['fin_pitch']
-        mp_cpo_sp = cls.tech_constants['mp_cpo_sp']
-        cpo_od_sp = cls.tech_constants['cpo_od_sp']
-        md_w = cls.tech_constants['md_w']
-        cpo_h = cls.tech_constants['cpo_h']
-        mp_h = cls.tech_constants['mp_h']
-        mx_spy_min = cls.tech_constants['mx_spy_min']
-
-        mos_constants = cls.get_mos_tech_constants(lch_unit)
+        mp_cpo_sp = mos_constants['mp_cpo_sp']
+        mp_h = mos_constants['mp_h']
+        cpo_od_sp = mos_constants['cpo_od_sp']
+        md_w = mos_constants['md_w']
+        cpo_h = mos_constants['cpo_h']
         sd_pitch = mos_constants['sd_pitch']
-        m3_w = mos_constants['mos_conn_w']
+        mos_conn_w = mos_constants['mos_conn_w']
+        vg_info = mos_constants['via_g']
+        vd_info = mos_constants['via_d']
 
-        gate_via_info = cls.get_gate_via_info(lch_unit)
-        gv0_h, gv1_h, gv2_h = gate_via_info['h']
-        g_m1_ency, g_m2_ency, g_m3_ency = gate_via_info['top_ency']
-        g_m1_h = gate_via_info['m1_h']
-        g_m2_h = gate_via_info['m2_h']
-        g_m3_h = gate_via_info['m3_h']
+        mx_spy_min = self.tech_info.get_min_line_end_space_unit('M3', mos_conn_w)
 
-        ds_via_info = cls.get_ds_via_info(lch_unit, w)
-        dv0_h, dv1_h, dv2_h = ds_via_info['h']
-        ds_md_bot_ency, ds_m1_bot_ency, ds_m2_bot_ency = ds_via_info['bot_ency']
-        d_m1_ency, d_m2_ency, d_m3_ency = ds_via_info['top_ency']
-        md_h = ds_via_info['md_h']
-        m1_h = ds_via_info['m1_h']
-        m3_h = ds_via_info['m3_h']
+        gv0_h = vg_info['dim'][0][1]
+        gv0_m1_ency = vg_info['top_enc_le'][0]
 
         # step 1: place bottom CPO, compute gate/OD locations
         # step 1A: get CPO location
@@ -211,7 +75,7 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         mp_yb = cpo_bot_yt + mp_cpo_sp
         mp_yt = mp_yb + mp_h
         mp_yc = (mp_yt + mp_yb) // 2
-        g_m1_yt = mp_yc + gv0_h // 2 + g_m1_ency
+        g_m1_yt = mp_yc + gv0_h // 2 + gv0_m1_ency
         # step 1C: get OD location, round to fin grid.
         od_yc = g_m1_yt + mx_spy_min + m1_h // 2
         if w % 2 == 0:
