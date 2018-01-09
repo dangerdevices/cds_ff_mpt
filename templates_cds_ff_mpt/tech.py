@@ -29,16 +29,15 @@ from __future__ import (absolute_import, division,
 from builtins import *
 
 import math
-from typing import List, Tuple, Optional
+from typing import TYPE_CHECKING, List, Tuple, Optional
 
-from bag.layout import TechInfo
-from bag.layout.template import TemplateBase
+from bag.layout.tech import TechInfoConfig
+
+if TYPE_CHECKING:
+    from bag.layout.template import TemplateBase
 
 
-from .mos.base import MOSTechCDSFFMPT
-
-
-class TechInfoCDSFFMPT(TechInfo):
+class TechInfoCDSFFMPT(TechInfoConfig):
     def __init__(self, process_params):
         process_params['layout']['mos_tech_class'] = MOSTechCDSFFMPT
         process_params['layout']['laygo_tech_class'] = None
@@ -48,55 +47,26 @@ class TechInfoCDSFFMPT(TechInfo):
         self.idc_temp = process_params['layout']['em']['dc_temp']
         self.irms_dt = process_params['layout']['em']['rms_dt']
 
-    @classmethod
-    def get_dnw_layers(cls):
-        # type: () -> List[Tuple[str, str]]
-        raise NotImplementedError('Not implemented')
+    def get_metal_em_specs(self, layer_name, w, l=-1, vertical=False, **kwargs):
+        return float('inf'), float('inf'), float('inf')
 
-    @classmethod
-    def get_dnw_margin_unit(cls, dnw_mode):
-        # type: (str) -> int
-        # TODO: update and put actual numbers here.
-        return 100
+    def get_via_em_specs(self, via_name, bm_layer, tm_layer, via_type='square',
+                         bm_dim=(-1, -1), tm_dim=(-1, -1), array=False, **kwargs):
+        return float('inf'), float('inf'), float('inf')
 
-    @classmethod
-    def get_implant_layers(cls, mos_type, res_type=None):
-        if mos_type == 'nch':
-            return []
-        elif mos_type == 'ptap':
-            return []
-        elif mos_type == 'pch':
-            return [('NW', 'drawing')]
-        else:
-            return [('NW', 'drawing')]
+    def get_res_em_specs(self, res_type, w, l=-1, **kwargs):
+        return float('inf'), float('inf'), float('inf')
 
-    @classmethod
-    def get_res_metal_layers(cls, layer_id):
-        # type: (int) -> List[Tuple[str, str]]
-        raise NotImplementedError('Not implemented')
-
-    @classmethod
-    def add_cell_boundary(cls, template, box):
+    def add_cell_boundary(self, template, box):
         pass
 
-    @classmethod
-    def draw_device_blockage(cls, template):
+    def draw_device_blockage(self, template):
         # type: (TemplateBase) -> None
         pass
 
-    @classmethod
-    def get_idc_scale_factor(cls, temp, mtype, is_res=False):
-        if is_res:
-            return 1.0
-        else:
-            if mtype == 't':
-                return 1.0
-            else:
-                return 1.0
-
-    @classmethod
-    def get_metal_idc_factor(cls, mtype, w, l):
-        return 1
+    def get_via_arr_enc(self, vname, vtype, mtype, mw_unit, is_bot):
+        # type: (...) -> Tuple[Optional[List[Tuple[int, int]]], Optional[Callable[[int, int], bool]]]
+        return None, None
 
     @classmethod
     def get_via_drc_info(cls, vname, vtype, mtype, mw_unit, is_bot):
