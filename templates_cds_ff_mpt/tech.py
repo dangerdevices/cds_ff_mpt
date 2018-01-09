@@ -29,7 +29,7 @@ from __future__ import (absolute_import, division,
 from builtins import *
 
 import math
-from typing import TYPE_CHECKING, List, Tuple, Optional
+from typing import TYPE_CHECKING, List, Tuple, Optional, Callable
 
 from bag.layout.tech import TechInfoConfig
 
@@ -139,70 +139,6 @@ class TechInfoCDSFFMPT(TechInfoConfig):
     def get_via_arr_enc(self, vname, vtype, mtype, mw_unit, is_bot):
         # type: (...) -> Tuple[Optional[List[Tuple[int, int]]], Optional[Callable[[int, int], bool]]]
         return None, None
-
-    @classmethod
-    def get_via_drc_info(cls, vname, vtype, mtype, mw_unit, is_bot):
-        # NOTE: we force space to be even in resolution units, because
-        # openaccess is bad with odd spacing.
-        arr_enc = None
-        arr_test = None
-        sp2_list = None  # type: Optional[List]
-        sp3_list = None
-        if vname == '1x' or vname == '4':
-            if vtype == 'square':
-                sp = [42, 42]
-                dim = [32, 32]
-                mw_enc = [(35, [(40, 0), (0, 40)]),
-                          (51, [(2, 34), (34, 2)]),
-                          (67, [(28, 10), (10, 28)]),
-                          (float('inf'), [(18, 18)]),
-                          ]
-            elif vtype == 'hrect' or vtype == 'vrect':
-                sp = [42, 42]
-                dim = [64, 32]
-                mw_enc = [(49, [(20, 0)]),
-                          (51, [(12, 9)]),
-                          (105, [(10, 10)]),
-                          (float('inf'), [(10, 0)]),
-                          ]
-            else:
-                raise ValueError('Unsupported vtype %s' % vtype)
-        elif vname == '2x':
-            if vtype != 'square':
-                raise ValueError('Unsupported vtype %s' % vtype)
-
-            sp3_list = [(78, 78)]
-            sp = [62, 62]
-            dim = [42, 42]
-            mw_enc = [(float('inf'), [(8, 8)])]
-        else:
-            raise ValueError('Unsupported vname %s' % vname)
-
-        enc = None  # type: List[Tuple[int, int]]
-        for mw_max, enc_list in mw_enc:
-            if mw_unit <= mw_max:
-                enc = enc_list
-                break
-
-        arr_test2 = arr_test
-        if vtype == 'vrect':
-            # flip X and Y direction parameters
-            sp = [sp[1], sp[0]]
-            dim = [dim[1], dim[0]]
-            enc = [(yv, xv) for xv, yv in enc]
-            if arr_enc is not None:
-                # noinspection PyTypeChecker
-                arr_enc = [(yv, xv) for xv, yv in arr_enc]
-            if arr_test is not None:
-                def arr_test2(nrow, ncol):
-                    # noinspection PyCallingNonCallable
-                    return arr_test(ncol, nrow)
-            if sp2_list is not None:
-                sp2_list = [(sp2[1], sp2[0]) for sp2 in sp2_list]
-            if sp3_list is not None:
-                sp3_list = [(sp3[1], sp3[0]) for sp3 in sp3_list]
-
-        return sp, sp2_list, sp3_list, dim, enc, arr_enc, arr_test2
 
     def get_min_space(self, layer_type, width, unit_mode=False, same_color=False):
         if layer_type == '1x':

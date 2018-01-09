@@ -108,38 +108,90 @@ idc_em_scale:
 
 # via enclosure/spacing rules
 via:
-  # via name
-  vx:
-    # via dimension type.  Support 'square' or 'hrect'.  vertical
-    # rectangle is derived from 'hrect'.
+  1x:
     square:
-      # via width/height
-      dim: [10, 10]
-      # via horizontal/vertical spacing
-      sp: [10, 10]
-      # list of valid via horizontal/vertical spacings when it's a 2x2 array
-      sp2: [!!python/tuple [10, 10]]
-      # list of valid via horizontal/vertical spacings when it's a mxn array,
-      # where min(m, n) >= 2, max(m, n) >= 3
-      sp3: [!!python/tuple [10, 10]]
-      # via bottom enclosure rules.  If empty, then assume it's the same
-      # as top enclosure.
+      dim: [32, 32]
+      sp: [42, 42]
+      sp2: [!!python/tuple [42, 42]]
+      sp3: [!!python/tuple [42, 42]]
       bot_enc:
-      # via top enclosure rules.
       top_enc:
-        # via enclosure rule as function of wire width.
-        w_list: [10, .inf]
-        # via enclosure rules corresponding to each width in w_list.  enc_list[idx]
-        # is used if wire width is less than or equal to w_list[idx].
+        w_list: [35, 51, 67, .inf]
+        enc_list:
+          - [[40, 0], [0, 40]]
+          - [[2, 34], [34, 2]]
+          - [[28, 10], [10, 28]]
+          - [[18, 18]]
+    hrect:
+      dim: [64, 32]
+      sp: [42, 42]
+      sp2: [!!python/tuple [42, 42]]
+      sp3: [!!python/tuple [42, 42]]
+      bot_enc:
+      top_enc:
+        w_list: [49, 51, 105, .inf]
+        enc_list:
+          - [[20, 0]]
+          - [[12, 9]]
+          - [[10, 10]]
+          - [[10, 0]]
+  2x:
+    square:
+      dim: [42, 42]
+      sp: [62, 62]
+      sp2: [!!python/tuple [62, 62]]
+      sp3: [!!python/tuple [78, 78]]
+      bot_enc:
+      top_enc:
+        w_list: [.inf]
+        enc_list:
+          - [[8, 8]]
+    hrect:
+      dim: [64, 32]
+      sp: [42, 42]
+      sp2: [!!python/tuple [42, 42]]
+      sp3: [!!python/tuple [42, 42]]
+      bot_enc:
+      top_enc:
+        w_list: [49, 51, 105, .inf]
+        enc_list:
+          - [[20, 0]]
+          - [[12, 9]]
+          - [[10, 10]]
+          - [[10, 0]]
+  '4':
+    square:
+      dim: [32, 32]
+      sp: [42, 42]
+      sp2: [!!python/tuple [42, 42]]
+      sp3: [!!python/tuple [42, 42]]
+      bot_enc:
+      top_enc:
+        w_list: [35, 51, 67, .inf]
+        enc_list:
+          - [[40, 0], [0, 40]]
+          - [[2, 34], [34, 2]]
+          - [[28, 10], [10, 28]]
+          - [[18, 18]]
+    hrect:
+      dim: [64, 32]
+      sp: [42, 42]
+      sp2: [!!python/tuple [42, 42]]
+      sp3: [!!python/tuple [42, 42]]
+      bot_enc:
+      top_enc:
+        w_list: [49, 51, 105, .inf]
         enc_list:
           # list of valid horizontal/vertical enclosures.
-          - [[10, 0], [0, 10]]
-          - [[10, 5], [5, 10]]
+          - [[20, 0]]
+          - [[12, 9]]
+          - [[10, 10]]
+          - [[10, 0]]
 
 # minimum wire spacing rule.  Space is measured orthogonal to wire direction.
 sp_min:
   # metal layer type
-  x:
+  1x:
     # wire spacing as function of wire width.  sp_list[idx] is used if
     # wire width is less than or equal to w_list[idx]
     w_list: [10, 20, .inf]
