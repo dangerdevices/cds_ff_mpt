@@ -4,19 +4,19 @@ from typing import TYPE_CHECKING, List, Tuple, Optional, Callable
 
 from bag.layout.tech import TechInfoConfig
 
+from . import config as _config
+
 if TYPE_CHECKING:
     from bag.layout.template import TemplateBase
 
 
 class TechInfoCDSFFMPT(TechInfoConfig):
     def __init__(self, process_params):
-        process_params['layout']['mos_tech_class'] = MOSTechCDSFFMPT
+        TechInfoConfig.__init__(self, _config, process_params)
+
+        process_params['layout']['mos_tech_class'] = None
         process_params['layout']['laygo_tech_class'] = None
         process_params['layout']['res_tech_class'] = None
-
-        TechInfoConfig.__init__(self, 0.001, 1e-6, 'cds_ff_mpt', process_params)
-        self.idc_temp = process_params['layout']['em']['dc_temp']
-        self.irms_dt = process_params['layout']['em']['rms_dt']
 
     def get_metal_em_specs(self, layer_name, w, l=-1, vertical=False, **kwargs):
         metal_type = self.get_layer_type(layer_name)
@@ -25,7 +25,7 @@ class TechInfoCDSFFMPT(TechInfoConfig):
         ipeak = float('inf')
         return idc, irms, ipeak
 
-    # noinspection PyUnusedLocal
+    # noinspection PyUnusedLocal,PyMethodMayBeStatic
     def _get_metal_idc_factor(self, mtype, w, l):
         return 1
 
