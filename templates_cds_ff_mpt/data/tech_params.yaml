@@ -305,6 +305,8 @@ mos:
   mp_md_sp: 13
   # vertical space between MP
   mp_spy: 34
+  # drain/source M2 space
+  ds_m2_sp: 50
   # horizontal extension of CPO beyond PO
   cpo_po_extx:
     lch: [.inf]
@@ -374,12 +376,20 @@ mos:
   po_od_exty:
     lch: [.inf]
     val: [10]
+  # gate wire bottom layer ID
+  g_bot_layer: 1
+  # drain/source wire bottom layer ID
+  d_bot_layer: 1
   # gate wire widths
-  w_conn_g: [40, 40, 40]
+  g_conn_w: [40, 40, 40]
   # drain wire widths
-  w_conn_d: [40, 40, 40]
+  d_conn_w: [40, 40, 40]
+  # gate wire directions
+  g_conn_dir: ['y', 'x', 'y']
+  # drain wire directions
+  d_conn_dir: ['y', 'x', 'y']
   # gate via parameters
-  via_g:
+  g_via:
     dim:
       - [32, 32]
       - [32, 32]
@@ -388,7 +398,7 @@ mos:
     bot_enc_le: [18, 40, 34]
     top_enc_le: [40, 34, 40]
   # drain/source via parameters
-  via_d:
+  d_via:
     dim:
       - [32, 32]
       - [32, 64]

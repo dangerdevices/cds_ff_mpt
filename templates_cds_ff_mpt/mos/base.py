@@ -58,39 +58,27 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         md_h_min = mos_constants['md_h_min']
         md_od_exty = mos_constants['md_od_exty']
         md_spy = mos_constants['md_spy']
-        mos_conn_w = mos_constants['mos_conn_w']
-        vg_info = mos_constants['via_g']
-        vd_info = mos_constants['via_d']
-        w_conn_g = mos_constants['w_conn_g']
-        w_conn_d = mos_constants['w_conn_d']
-
-        d_m2_h = w_conn_d[1]
-        my_spy = self.tech_info.get_min_line_end_space_unit('1x', mos_conn_w)
-        my_h_min = self.tech_info.get_min_length_unit('1x', mos_conn_w)
-        mx_spy = self.tech_info.get_min_space_unit('1x', d_m2_h)
+        ds_m2_sp = mos_constants['ds_m2_sp']
 
         # compute gate/drain connection parameters
-        gv0_h = vg_info['dim'][0][1]
-        gv2_h = vg_info['dim'][2][1]
-        gv0_m1_ency = vg_info['top_enc_le'][0]
-        gv2_m3_ency = vg_info['top_enc_le'][2]
-        g_m1_exty = gv0_h // 2 + gv0_m1_ency
-        g_m3_exty = gv2_h // 2 + gv2_m3_ency
-        g_m1_h = max(2 * g_m1_exty, my_h_min)
-        g_m3_h = max(2 * g_m3_exty, my_h_min)
-        g_m2_h = w_conn_g[1]
+        g_conn_info = self.get_conn_drc_info(lch_unit, 'g')
+        g_m1_h = g_conn_info[1]['min_len']
+        g_m1_top_exty = g_conn_info[1]['top_ext']
+        g_m1_bot_exty = g_conn_info[1]['bot_ext']
+        g_m1_sple = g_conn_info[1]['sp_le']
+        g_m2_h = g_conn_info[2]['w']
+        g_m3_h = g_conn_info[3]['min_len']
+        g_m3_exty = g_conn_info[3]['top_ext']
 
-        dv1_h = vd_info['dim'][1][1]
-        dv2_h = vd_info['dim'][2][1]
-        dv1_m1_ency = vd_info['bot_enc_le'][1]
-        dv2_m3_ency = vd_info['top_enc_le'][2]
-        d_m1_exty = dv1_h // 2 + dv1_m1_ency
-        d_m3_exty = dv2_h // 2 + dv2_m3_ency
+        d_conn_info = self.get_conn_drc_info(lch_unit, 'd')
+        d_m1_h = d_conn_info[1]['min_len']
+        d_m1_bot_exty = d_conn_info[1]['bot_ext']
+        d_m2_h = d_conn_info[2]['w']
+        d_m3_h = d_conn_info[3]['min_len']
+        d_m3_sple = d_conn_info[3]['sp_le']
 
         od_h = (w - 1) * fin_p + fin_h
         md_h = max(od_h + 2 * md_od_exty, md_h_min)
-        d_m1_h = max(my_h_min, 2 * d_m1_exty + d_m2_h + mx_spy)
-        d_m3_h = max(my_h_min, 2 * d_m3_exty)
 
         # place bottom CPO, compute gate/OD locations
         blk_yb = 0
@@ -100,9 +88,9 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         mp_yb = cpo_bot_yt + mp_cpo_sp
         mp_yt = mp_yb + mp_h
         mp_yc = (mp_yt + mp_yb) // 2
-        g_m1_yt = mp_yc + g_m1_exty
+        g_m1_yt = mp_yc + g_m1_top_exty
         # get OD location, round to fin grid.
-        od_yc = g_m1_yt + my_spy + md_h // 2
+        od_yc = g_m1_yt + g_m1_sple + md_h // 2
         if w % 2 == 0:
             od_yc = -(-od_yc // fin_p) * fin_p
         else:
@@ -115,9 +103,9 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         d_m1_yb = md_yb
         d_m1_yt = d_m1_yb + d_m1_h
         # update gate location
-        g_m1_yt = d_m1_yb - my_spy
+        g_m1_yt = d_m1_yb - g_m1_sple
         g_m1_yb = g_m1_yt - g_m1_h
-        g_m2_yc = g_m1_yt - g_m1_exty
+        g_m2_yc = g_m1_yt - g_m1_bot_exty
 
         # compute top CPO location.
         blk_yt = od_yt + cpo_od_sp + cpo_h // 2
@@ -130,13 +118,13 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         g_m3_yb = g_m3_yt - g_m3_h
 
         # compute source wire location
-        s_m2_yc = d_m1_yb + d_m1_exty
+        s_m2_yc = d_m1_yb + d_m1_bot_exty
         s_m2_yb = s_m2_yc - d_m2_h // 2
         s_m2_yt = s_m2_yb + d_m2_h
         s_m3_yb = s_m2_yc - d_m3_h // 2
         s_m3_yt = s_m3_yb + d_m3_h
         # compute drain wire location
-        d_m2_yb = s_m2_yt + mx_spy
+        d_m2_yb = s_m2_yt + ds_m2_sp
         d_m2_yt = d_m2_yb + d_m2_h
         d_m2_yc = (d_m2_yb + d_m2_yt) // 2
         d_m3_yb = d_m2_yc - d_m3_h // 2
@@ -149,14 +137,14 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
             top_margins=dict(
                 od=(blk_yt - od_yt, od_spy),
                 md=(blk_yt - md_yt, md_spy),
-                m1=(blk_yt - d_m1_yt, my_spy),
-                m3=(blk_yt - d_m3_yt, my_spy)
+                m1=(blk_yt - d_m1_yt, g_m1_sple),
+                m3=(blk_yt - d_m3_yt, d_m3_sple)
             ),
             bot_margins=dict(
                 od=(od_yb - blk_yb, od_spy),
                 md=(md_yb - blk_yb, md_spy),
-                m1=(g_m1_yb - blk_yb, my_spy),
-                m3=(g_m3_yb - blk_yb, my_spy),
+                m1=(g_m1_yb - blk_yb, g_m1_sple),
+                m3=(g_m3_yb - blk_yb, d_m3_sple),
             ),
             fill_info={},
             g_y_list=[(mp_yb, mp_yt), (g_m1_yb, g_m1_yt),
@@ -167,475 +155,8 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
                       (s_m2_yb, s_m2_yt), (s_m3_yb, s_m3_yt)],
         )
 
-    @classmethod
-    def get_valid_extension_widths(cls, lch_unit, top_ext_info, bot_ext_info):
-        # type: (int, ExtInfo, ExtInfo) -> List[int]
-        """Compute a list of valid extension widths.
-
-        The DRC rules that we consider are:
-
-        1. wire line-end space
-        #. MD space
-        # implant/threshold layers minimum width.
-        #. CPO space
-        #. max OD space
-        #. lower metal fill
-        #. implant/threshold layers to draw
-
-        Of these rules, only the first three sets the minimum extension width.  However,
-        if the maximum extension width with no dummy OD is smaller than 1 minus the minimum
-        extension width with dummy OD, then that implies there exists some extension widths
-        that need dummy OD but can't draw it.
-
-        so our layout strategy is:
-
-        1. compute minimum extension width from wire line-end/MD spaces/minimum implant width.
-        #. Compute the maximum extension width that we don't need to draw dummy OD.
-        #. Compute the minimum extension width that we can draw DRC clean dummy OD.
-        #. Return the list of valid extension widths
-        """
-        fin_h = cls.tech_constants['fin_h']  # type: int
-        fin_p = cls.tech_constants['fin_pitch']  # type: int
-        od_sp_nfin_max = cls.tech_constants['od_sp_nfin_max']
-        od_nfin_min = cls.tech_constants['od_nfin_min']
-        cpo_od_sp = cls.tech_constants['cpo_od_sp']  # type: int
-        cpo_spy = cls.tech_constants['cpo_spy']
-        md_od_exty = cls.tech_constants['md_od_exty']
-        imp_od_ency = cls.tech_constants['imp_od_ency']
-        mx_spy_min = cls.tech_constants['mx_spy_min']  # type: int
-        md_sp = cls.tech_constants['md_sp']  # type: int
-        cpo_h = cls.tech_constants['cpo_h']
-        md_h_min = cls.tech_constants['md_h_min']
-
-        fin_p2 = fin_p // 2
-        fin_h2 = fin_h // 2
-
-        bot_imp_min_w = bot_ext_info.imp_min_w  # type: int
-        top_imp_min_w = top_ext_info.imp_min_w  # type: int
-
-        # step 1: get minimum extension width
-        mx_margin = top_ext_info.mx_margin + bot_ext_info.mx_margin  # type: int
-        m1_margin = top_ext_info.m1_margin + bot_ext_info.m1_margin  # type: int
-        min_ext_w = max(0, -(-(mx_spy_min - min(mx_margin, m1_margin)) // fin_p))
-        md_margin = top_ext_info.md_margin + bot_ext_info.md_margin
-        min_ext_w = max(min_ext_w, -(-(md_sp - md_margin) // fin_p), -(-(bot_imp_min_w + top_imp_min_w) // fin_p))
-
-        # step 2: get maximum extension width without dummy OD
-        od_space_nfin = (top_ext_info.od_margin + bot_ext_info.od_margin + fin_h) // fin_p
-        max_ext_w_no_od = od_sp_nfin_max - od_space_nfin
-
-        # step 3: find minimum extension width with dummy OD
-        # now, the tricky part is that we need to make sure OD can be drawn in such a way
-        # that we can satisfy both minimum implant width constraint and implant-OD enclosure
-        # constraint.  Currently, we compute minimum size so we can split implant either above
-        # or below OD and they'll both be DRC clean.  This is a little sub-optimal, but
-        # makes layout algorithm much much easier.
-
-        # get od_yb_max1, round to fin grid.
-        dum_md_yb = -bot_ext_info.md_margin + md_sp
-        od_yb_max1 = max(dum_md_yb + md_od_exty, cpo_h // 2 + cpo_od_sp)
-        od_yb_max1 = -(-(od_yb_max1 - fin_p2 + fin_h2) // fin_p)
-        # get od_yb_max2, round to fin grid.
-        od_yb_max = bot_imp_min_w + imp_od_ency
-        od_yb_max = max(od_yb_max1, -(-(od_yb_max - fin_p2 + fin_h2) // fin_p))
-
-        # get od_yt_min1 assuming yt = 0, round to fin grid.
-        dum_md_yt = top_ext_info.md_margin - md_sp
-        od_yt_min1 = min(dum_md_yt - md_od_exty, -(cpo_h // 2) - cpo_od_sp)
-        od_yt_min1 = (od_yt_min1 - fin_p2 - fin_h2) // fin_p
-        # get od_yt_min2, round to fin grid.
-        od_yt_min = -top_imp_min_w - imp_od_ency
-        od_yt_min = min(od_yt_min1, (od_yt_min - fin_p2 - fin_h2) // fin_p)
-
-        # get minimum extension width from OD related spacing rules
-        min_ext_w_od = max(0, od_nfin_min - (od_yt_min - od_yb_max) - 1) * fin_p
-        # check to see CPO spacing rule is satisfied
-        min_ext_w_od = max(min_ext_w_od, cpo_spy + cpo_h)
-        # check to see MD minimum height rule is satisfied
-        min_ext_w_od = max(min_ext_w_od, md_h_min - (dum_md_yt - dum_md_yb))
-        # round min_ext_w_od to fin grid.
-        min_ext_w_od = -(-min_ext_w_od // fin_p)
-
-        if min_ext_w_od <= max_ext_w_no_od + 1:
-            # we can transition from no-dummy to dummy seamlessly
-            return [min_ext_w]
-        else:
-            # there exists extension widths such that we need dummies but cannot draw it
-            width_list = list(range(min_ext_w, max_ext_w_no_od + 1))
-            width_list.append(min_ext_w_od)
-            return width_list
-
-    @classmethod
-    def _get_ext_dummy_loc(cls, lch_unit, bot_od_idx, top_od_idx, bot_cpo_yt, top_cpo_yb, bot_md_yt, top_md_yb,
-                           bot_imp_y, top_imp_y):
-        """ calculate extension dummy location if we only draw one dummy. """
-        cpo_od_sp = cls.tech_constants['cpo_od_sp']
-        fin_p = cls.tech_constants['fin_pitch']
-        fin_h = cls.tech_constants['fin_h']
-        od_nfin_min = cls.tech_constants['od_nfin_min']
-        md_od_exty = cls.tech_constants['md_od_exty']
-        imp_od_ency = cls.tech_constants['imp_od_ency']
-        od_sp_nfin_max = cls.tech_constants['od_sp_nfin_max']
-        md_sp = cls.tech_constants['md_sp']
-        md_h_min = cls.tech_constants['md_h_min']
-
-        fin_p2 = fin_p // 2
-        fin_h2 = fin_h // 2
-
-        # calculate minimum OD coordinates
-        md_yb_min = bot_md_yt + md_sp
-        md_yt_max = top_md_yb - md_sp
-        od_yb_min = max(bot_cpo_yt + cpo_od_sp, md_yb_min + md_od_exty, bot_imp_y + imp_od_ency)
-        od_yt_max = min(top_cpo_yb - cpo_od_sp, md_yt_max - md_od_exty, top_imp_y - imp_od_ency)
-
-        od_area = top_od_idx - bot_od_idx
-        od_sp = min((od_area - od_nfin_min) // 2, od_sp_nfin_max)
-        od_nfin = od_area - (od_sp * 2) + 1
-        od_yb = (bot_od_idx + od_sp) * fin_p + fin_p2 - fin_h2
-        od_yt = od_yb + (od_nfin - 1) * fin_p + fin_h
-
-        # make sure OD Y coordinates are legal.
-        od_h_min = (od_nfin_min - 1) * fin_p + fin_h
-        if od_yb < od_yb_min:
-            od_yb = -(-(od_yb_min - fin_p2 + fin_h2) // fin_p) * fin_p + fin_p2 - fin_h2
-            od_yt = max(od_yb + od_h_min, od_yt)
-        if od_yt > od_yt_max:
-            od_yt = (od_yt_max - fin_p2 - fin_h2) // fin_p * fin_p + fin_p2 + fin_h2
-            od_yb = min(od_yt - od_h_min, od_yb)
-
-        # compute MD Y coordinates.
-        md_h = max(md_h_min, od_yt - od_yb + 2 * md_od_exty)
-        od_yc = (od_yb + od_yt) // 2
-        md_yb = od_yc - md_h // 2
-        md_yt = md_yb + md_h
-        # make sure MD Y coordinates are legal
-        if md_yb < md_yb_min:
-            md_yb = md_yb_min
-            md_yt = max(md_yt, md_yb + md_h_min)
-        if md_yt > md_yt_max:
-            md_yt = md_yt_max
-            md_yb = min(md_yt - md_h_min, md_yb)
-
-        return [(od_yb, od_yt)], [(md_yb, md_yt)]
-
-    @classmethod
-    def get_ext_info(cls, lch_unit, w, fg, top_ext_info, bot_ext_info):
-        # type: (int, int, int, ExtInfo, ExtInfo) -> Dict[str, Any]
-        """Draw extension block.
-
-        extension block has zero or more rows of dummy transistors, the OD spacing
-        is guarantee to be < 0.6um so when guard ring edge draw substrate contact
-        in the same rows, we meet the guard ring OD separation constraint.  Most layout
-        is straight-forward, but getting the implant right is very tricky.
-
-        Extension implant strategy:
-
-        constraints are:
-        1. we cannot have checker-board pattern PP/NP.
-        2. PP/NP minimum width needs to be met
-        3. OD cannot intersect multiple types of implant.
-
-        we use the following strategy (note that in LaygoBase, a transistor row can have
-        both transistor or substrate):
-
-        cases:
-        1. top and bottom are same flavor transistor / sub (e.g. nch + nch or nch + ptap).
-           split at middle, draw more dummy OD on substrate side.
-        2. top and bottom are same flavor sub.
-           split at middle.  The split point is chosen based on threshold alphabetical
-           comparison, so we make sure we consistently favor one threshold over another.
-        3. top and bottom are same flavor transistor.
-            split at middle.  If there's OD, we force to use transistor implant.  This avoid constraint 3.
-        4. top and bottom row are different flavor sub.
-            split at middle, draw more dummy OD on ptap side.
-        5. top and bottom are different flavor, transistor and sub.
-            we use transistor implant
-        6. top and bottom are different transistor.
-            split, force to use transistor implant to avoid constraint 1.
-        """
-        md_od_exty = cls.tech_constants['md_od_exty']
-        fin_h = cls.tech_constants['fin_h']
-        fin_p = cls.tech_constants['fin_pitch']
-        od_nfin_min = cls.tech_constants['od_nfin_min']
-        od_nfin_max = cls.tech_constants['od_nfin_max']
-        od_sp_nfin_max = cls.tech_constants['od_sp_nfin_max']
-        cpo_spy = cls.tech_constants['cpo_spy']
-        imp_od_ency = cls.tech_constants['imp_od_ency']
-        md_h_min = cls.tech_constants['md_h_min']
-        cpo_h = cls.tech_constants['cpo_h']
-        md_w = cls.tech_constants['md_w']
-
-        mos_constants = cls.get_mos_tech_constants(lch_unit)
-        m1_w = mos_constants['mos_conn_w']
-        sd_pitch = mos_constants['sd_pitch']
-
-        fin_p2 = fin_p // 2
-        fin_h2 = fin_h // 2
-        yt = w * fin_p
-        yc = yt // 2
-
-        lr_edge_info = EdgeInfo(od_type='dum')
-        if w == 0:
-            # just draw CPO
-            layout_info = dict(
-                lch_unit=lch_unit,
-                md_w=md_w,
-                fg=fg,
-                sd_pitch=sd_pitch,
-                array_box_xl=0,
-                array_box_y=(0, 0),
-                draw_od=True,
-                row_info_list=[],
-                lay_info_list=[(('CutPoly', 'drawing'), 0, -cpo_h // 2, cpo_h // 2)],
-                adj_info_list=[],
-                left_blk_info=None,
-                right_blk_info=None,
-                fill_info_list=[],
-
-                # information needed for computing edge block layout
-                blk_type='ext',
-                imp_params=None,
-            )
-
-            return dict(
-                layout_info=layout_info,
-                left_edge_info=(lr_edge_info, []),
-                right_edge_info=(lr_edge_info, []),
-            )
-
-        # step 1: compute OD Y coordinates
-        bot_od_yt = -bot_ext_info.od_margin
-        bot_od_yt_fin = (bot_od_yt - fin_p2 - fin_h2) // fin_p
-        top_od_yb = yt + top_ext_info.od_margin
-        top_od_yb_fin = (top_od_yb - fin_p2 + fin_h2) // fin_p
-        area = top_od_yb_fin - bot_od_yt_fin
-        od_fin_list = fill_symmetric_const_space(area, od_sp_nfin_max, od_nfin_min, od_nfin_max, offset=bot_od_yt_fin)
-
-        # check if we draw one or two CPO.  Compute threshold split Y coordinates accordingly.
-        cpo2_w = -(-(cpo_spy + cpo_h) // fin_p)  # type: int
-        one_cpo = (w < cpo2_w)
-
-        # calculate fill
-        m1_sp_max = cls.tech_constants['m1_sp_max']
-        m1_fill_lmin = cls.tech_constants['m1_fill_lmin']
-        m1_fill_lmax = cls.tech_constants['m1_fill_lmax']
-        area_yb = -bot_ext_info.m1_margin
-        area_yt = yt + top_ext_info.m1_margin
-        fill_y_list = fill_symmetric_const_space(area_yt - area_yb, m1_sp_max, m1_fill_lmin,
-                                                 m1_fill_lmax, offset=area_yb)
-
-        lay_info_list = []
-        cpo_lay = ('CutPoly', 'drawing')
-        if not od_fin_list:
-            # no dummy OD
-            od_x_list = []
-            od_y_list = md_y_list = [(0, 0)]
-
-            if one_cpo:
-                po_y_list = [(0, 0)]
-                imp_split_y = (yc, yc)
-                # compute adjacent row geometry
-                adj_edgel_infos = [bot_ext_info.edgel_info, top_ext_info.edgel_info]
-                adj_edger_infos = [bot_ext_info.edger_info, top_ext_info.edger_info]
-                adj_row_list = [AdjRowInfo(po_types=bot_ext_info.po_types,
-                                           po_y=(0, yc),
-                                           ),
-                                AdjRowInfo(po_types=top_ext_info.po_types,
-                                           po_y=(yc, yt),
-                                           )]
-                lay_info_list.append((cpo_lay, 0, yc - cpo_h // 2, yc + cpo_h // 2))
-            else:
-                po_y_list = [(0, yt)]
-                imp_split_y = (0, yt)
-                adj_row_list = []
-                adj_edgel_infos = []
-                adj_edger_infos = []
-                lay_info_list.append((cpo_lay, 0, -cpo_h // 2, cpo_h // 2))
-                lay_info_list.append((cpo_lay, 0, yt - cpo_h // 2, yt + cpo_h // 2))
-
-        else:
-            # has dummy OD, compute OD X/Y coordinates
-            adj_row_list = []
-            adj_edgel_infos = []
-            adj_edger_infos = []
-            od_x_list = [(0, fg)]
-            # add OD and CPO layout information, also calculate fill
-            num_dod = len(od_fin_list)
-            if num_dod == 1:
-                # if we only have 1 dummy, use manual algorithm to make sure we satisfy MD-MD and CPO-MD rules
-                bot_cpo_yt = cpo_h // 2
-                top_cpo_yb = yt - cpo_h // 2
-                bot_md_yt = -bot_ext_info.md_margin
-                top_md_yb = yt + top_ext_info.md_margin
-                bot_imp_y = bot_ext_info.imp_min_w
-                top_imp_y = yt - top_ext_info.imp_min_w
-                od_y_list, md_y_list = cls._get_ext_dummy_loc(lch_unit, bot_od_yt_fin, top_od_yb_fin,
-                                                              bot_cpo_yt, top_cpo_yb, bot_md_yt, top_md_yb,
-                                                              bot_imp_y, top_imp_y)
-            else:
-                # for 2 for more dummy, od_sp_nfin_max (12) and od_nfin_max (20) values guarantee that
-                # all dummy locations are DRC clean
-                od_y_list = []
-                md_y_list = []
-                for a, b in od_fin_list:
-                    od_yb = fin_p2 - fin_h2 + a * fin_p
-                    od_yt = fin_p2 + fin_h2 + b * fin_p
-                    od_yc = (od_yb + od_yt) // 2
-                    md_h = max(md_h_min, od_yt - od_yb + 2 * md_od_exty)
-                    md_yb = od_yc - md_h // 2
-                    md_yt = od_yc + md_h // 2
-                    od_y_list.append((od_yb, od_yt))
-                    md_y_list.append((md_yb, md_yt))
-
-            # get PO/CPO locations
-            cpo_yc = 0
-            cpo_yc_list = []
-            po_y_list = []
-            for idx, (od_yb, od_yt) in enumerate(od_y_list):
-                # find next CPO coordinates
-                if idx + 1 < num_dod:
-                    next_cpo_yc = (od_yt + od_y_list[idx + 1][0]) // 2
-                else:
-                    next_cpo_yc = yt
-
-                # record PO Y coordinates
-                po_y_list.append((cpo_yc, next_cpo_yc))
-
-                # add CPO
-                lay_info_list.append((cpo_lay, 0, cpo_yc - cpo_h // 2, cpo_yc + cpo_h // 2))
-                cpo_yc_list.append(cpo_yc)
-                # update CPO coordinates.
-                cpo_yc = next_cpo_yc
-
-            # add last CPO
-            lay_info_list.append((cpo_lay, 0, yt - cpo_h // 2, yt + cpo_h // 2))
-            cpo_yc_list.append(yt)
-
-            # compute implant split Y coordinates
-            if num_dod % 2 == 0:
-                # we can split exactly in middle
-                imp_split_y = (yc, yc)
-            else:
-                # Find the two middle CPO coordinates.
-                top_cpo_idx = num_dod // 2
-                od_yb, od_yt = od_y_list[top_cpo_idx]
-                imp_split_y = (od_yb - imp_od_ency, od_yt + imp_od_ency)
-
-        # compute implant and threshold layer information
-        top_mtype, top_row_type = top_ext_info.mtype
-        top_thres = top_ext_info.thres
-        bot_mtype, bot_row_type = bot_ext_info.mtype
-        bot_thres = bot_ext_info.thres
-        bot_imp = 'nch' if (bot_row_type == 'nch' or bot_row_type == 'ptap') else 'pch'
-        top_imp = 'nch' if (top_row_type == 'nch' or top_row_type == 'ptap') else 'pch'
-        bot_tran = (bot_row_type == 'nch' or bot_row_type == 'pch')
-        top_tran = (top_row_type == 'nch' or top_row_type == 'pch')
-        # figure out where to separate top/bottom implant/threshold.
-        if bot_imp == top_imp:
-            if bot_tran != top_tran:
-                # case 1
-                sep_idx = 0 if bot_tran else 1
-            elif bot_tran:
-                # case 3
-                sep_idx = 0 if bot_thres <= top_thres else 1
-                if od_x_list:
-                    bot_mtype = top_mtype = bot_imp
-            else:
-                # case 2
-                sep_idx = 0 if bot_thres <= top_thres else 1
-        else:
-            if bot_tran != top_tran:
-                # case 5
-                if bot_tran:
-                    top_mtype = bot_imp
-                    top_thres = bot_thres
-                    sep_idx = 1
-                else:
-                    bot_mtype = top_imp
-                    bot_thres = top_thres
-                    sep_idx = 0
-            elif bot_tran:
-                # case 6
-                bot_mtype = bot_imp
-                top_mtype = top_imp
-                sep_idx = 1 if bot_imp == 'nch' else 0
-            else:
-                # case 4
-                sep_idx = 1 if bot_imp == 'nch' else 0
-
-        # add implant layers
-        imp_ysep = imp_split_y[sep_idx]
-        imp_params = [(bot_mtype, bot_thres, 0, imp_ysep, 0, imp_ysep),
-                      (top_mtype, top_thres, imp_ysep, yt, imp_ysep, yt)]
-
-        for mtype, thres, imp_yb, imp_yt, thres_yb, thres_yt in imp_params:
-            for lay in cls.get_mos_layers(mtype, thres):
-                if lay[0].startswith('VT'):
-                    cur_yb, cur_yt = thres_yb, thres_yt
-                else:
-                    cur_yb, cur_yt = imp_yb, imp_yt
-                lay_info_list.append((lay, 0, cur_yb, cur_yt))
-
-        # construct row_info_list, now we know where the implant splits
-        row_info_list = []
-        for od_y, po_y, md_y in zip(od_y_list, po_y_list, md_y_list):
-            cur_mtype = bot_mtype if max(od_y[0], od_y[1]) < imp_ysep else top_mtype
-            cur_sub_type = 'ptap' if cur_mtype == 'nch' or cur_mtype == 'ptap' else 'ntap'
-            row_info_list.append(RowInfo(od_x_list=od_x_list, od_y=od_y, od_type=('dum', cur_sub_type),
-                                         po_y=po_y, md_y=md_y))
-
-        # compute metal 1 fill locations
-        fill_x_list = [(idx * sd_pitch - m1_w // 2, idx * sd_pitch + m1_w // 2)
-                       for idx in range(0, fg + 1)]
-        fill_info = FillInfo(layer=('M1', 'drawing'), exc_layer=None,
-                             x_intv_list=fill_x_list, y_intv_list=fill_y_list)
-        # create layout information dictionary
-        layout_info = dict(
-            lch_unit=lch_unit,
-            md_w=md_w,
-            fg=fg,
-            sd_pitch=sd_pitch,
-            array_box_xl=0,
-            array_box_y=(0, yt),
-            draw_od=True,
-            row_info_list=row_info_list,
-            lay_info_list=lay_info_list,
-            adj_info_list=adj_row_list,
-            left_blk_info=None,
-            right_blk_info=None,
-            fill_info_list=[fill_info],
-
-            # information needed for computing edge block layout
-            blk_type='ext',
-            imp_params=imp_params,
-        )
-
-        return dict(
-            layout_info=layout_info,
-            left_edge_info=(lr_edge_info, adj_edgel_infos),
-            right_edge_info=(lr_edge_info, adj_edger_infos),
-        )
-
-    @classmethod
-    def get_sub_ring_ext_info(cls, sub_type, height, fg, end_ext_info, **kwargs):
-        # type: (str, int, int, ExtInfo, **kwargs) -> Dict[str, Any]
-        # TODO: add actual implementation.
-        raise NotImplementedError('Not implemented yet.')
-
-    @classmethod
-    def _get_sub_m1_y(cls, lch_unit, od_yc, od_nfin):
-        """Get M1 Y coordinates for substrate connection."""
-        via_info = cls.get_ds_via_info(lch_unit, od_nfin)
-        m1_h = via_info['m1_h']
-
-        m1_yb = od_yc - m1_h // 2
-        m1_yt = od_yc + m1_h // 2
-
-        return m1_yb, m1_yt
-
-    @classmethod
-    def get_substrate_info(cls, lch_unit, w, sub_type, threshold, fg, blk_pitch=1, **kwargs):
-        # type: (int, int, str, str, int, int, **kwargs) -> Dict[str, Any]
+    def get_sub_yloc_info(self, lch_unit, w, sub_type, threshold, fg, **kwargs):
+        # type: (int, int, str, str, int, **kwargs) -> Dict[str, Any]
         """Get substrate layout information.
 
         Layout is quite simple.  We use M0PO to short adjacent S/D together, so dummies can be
@@ -649,16 +170,22 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         #. make sure MD/M1 are centered on OD.
         """
 
-        md_od_exty = cls.tech_constants['md_od_exty']
-        fin_h = cls.tech_constants['fin_h']
-        fin_p = cls.tech_constants['fin_pitch']
-        mp_h = cls.tech_constants['mp_h']
-        mp_cpo_sp = cls.tech_constants['mp_cpo_sp']
-        mp_md_sp = cls.tech_constants['mp_md_sp']
-        mp_spy = cls.tech_constants['mp_spy']
-        cpo_h = cls.tech_constants['cpo_h']
-        md_h_min = cls.tech_constants['md_h_min']
-        md_w = cls.tech_constants['md_w']
+        mos_constants = self.get_mos_tech_constants(lch_unit)
+        fin_h = mos_constants['fin_h']
+        fin_p = mos_constants['mos_pitch']
+        od_spy = mos_constants['od_spy']
+        mp_cpo_sp = mos_constants['mp_cpo_sp']
+        mp_h = mos_constants['mp_h']
+        cpo_od_sp = mos_constants['cpo_od_sp']
+        cpo_h = mos_constants['cpo_h']
+        md_h_min = mos_constants['md_h_min']
+        md_od_exty = mos_constants['md_od_exty']
+        md_spy = mos_constants['md_spy']
+        mos_conn_w = mos_constants['mos_conn_w']
+        vg_info = mos_constants['via_g']
+        vd_info = mos_constants['via_d']
+        w_conn_g = mos_constants['w_conn_g']
+        w_conn_d = mos_constants['w_conn_d']
 
         fin_p2 = fin_p // 2
         fin_h2 = fin_h // 2
