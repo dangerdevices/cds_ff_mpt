@@ -53,6 +53,7 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         od_spy = mos_constants['od_spy']
         mp_cpo_sp = mos_constants['mp_cpo_sp']
         mp_h = mos_constants['mp_h']
+        mp_spy = mos_constants['mp_spy']
         cpo_od_sp = mos_constants['cpo_od_sp']
         cpo_h = mos_constants['cpo_h']
         md_h_min = mos_constants['md_h_min']
@@ -85,7 +86,7 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         cpo_bot_yb = blk_yb - cpo_h // 2
         cpo_bot_yt = cpo_bot_yb + cpo_h
         # get gate via/M1 location
-        mp_yb = cpo_bot_yt + mp_cpo_sp
+        mp_yb = max(mp_spy // 2, cpo_bot_yt + mp_cpo_sp)
         mp_yt = mp_yb + mp_h
         mp_yc = (mp_yt + mp_yb) // 2
         g_m1_yt = mp_yc + g_m1_top_exty
@@ -169,6 +170,7 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         #. Round up template height to blk_pitch, then recenter OD.
         #. make sure MD/M1 are centered on OD.
         """
+        blk_pitch = kwargs['blk_pitch']
 
         mos_constants = self.get_mos_tech_constants(lch_unit)
         fin_h = mos_constants['fin_h']
@@ -176,665 +178,96 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         od_spy = mos_constants['od_spy']
         mp_cpo_sp = mos_constants['mp_cpo_sp']
         mp_h = mos_constants['mp_h']
-        cpo_od_sp = mos_constants['cpo_od_sp']
+        mp_spy = mos_constants['mp_spy']
+        mp_md_sp = mos_constants['mp_md_sp']
         cpo_h = mos_constants['cpo_h']
         md_h_min = mos_constants['md_h_min']
         md_od_exty = mos_constants['md_od_exty']
         md_spy = mos_constants['md_spy']
-        mos_conn_w = mos_constants['mos_conn_w']
-        vg_info = mos_constants['via_g']
-        vd_info = mos_constants['via_d']
-        w_conn_g = mos_constants['w_conn_g']
-        w_conn_d = mos_constants['w_conn_d']
 
-        fin_p2 = fin_p // 2
-        fin_h2 = fin_h // 2
+        # compute gate/drain connection parameters
+        g_conn_info = self.get_conn_drc_info(lch_unit, 'g')
+        g_m1_top_exty = g_conn_info[1]['top_ext']
+        g_m1_sple = g_conn_info[1]['sp_le']
 
-        mos_constants = cls.get_mos_tech_constants(lch_unit)
-        sd_pitch = mos_constants['sd_pitch']
+        d_conn_info = self.get_conn_drc_info(lch_unit, 'd')
+        d_m2_h = d_conn_info[2]['w']
+        d_m3_h = d_conn_info[3]['min_len']
+        d_m3_sple = d_conn_info[3]['sp_le']
 
-        # figure out od/md height
         od_h = (w - 1) * fin_p + fin_h
-        md_h = max(md_h_min, od_h + 2 * md_od_exty)
-        md_od_exty = (md_h - od_h) // 2
+        md_h = max(od_h + 2 * md_od_exty, md_h_min)
 
-        # step 1: figure out Y coordinate of bottom CPO
+        # figure out Y coordinate of bottom CPO
         cpo_bot_yt = cpo_h // 2
 
-        # step 2: find bottom M0_PO coordinate
+        # find bottom M0_PO coordinate
         mp_yb = max(mp_spy // 2, cpo_bot_yt + mp_cpo_sp)
         mp_yt = mp_yb + mp_h
 
-        # step 3: find OD coordinate
-        od_bfin_yc = mp_yt + mp_md_sp + md_od_exty
-        od_bfin_yc = -(-(od_bfin_yc - fin_p2) // fin_p) * fin_p + fin_p2
-        od_yb = od_bfin_yc - fin_h2
+        # find first-pass OD coordinate
+        od_yc = mp_yt + mp_md_sp + md_h // 2
+        if w % 2 == 0:
+            od_yc = -(-od_yc // fin_p) * fin_p
+        else:
+            od_yc = -(-(od_yc - fin_p // 2) // fin_p) * fin_p + fin_p // 2
+        od_yb = od_yc - od_h // 2
         od_yt = od_yb + od_h
         cpo_top_yc = od_yt + od_yb
+
         # fix substrate height quantization, then recenter OD location
         blk_pitch = lcm([blk_pitch, fin_p])
         blk_h = -(-cpo_top_yc // blk_pitch) * blk_pitch
         cpo_top_yc = blk_h
-        od_yb = blk_h // 2 - od_h // 2
-        od_yb = (od_yb - fin_p2 + fin_h2) // fin_p * fin_p + fin_p2 - fin_h2
+        od_yc = blk_h // 2
+        if w % 2 == 0:
+            od_yc = -(-od_yc // fin_p) * fin_p
+        else:
+            od_yc = -(-(od_yc - fin_p // 2) // fin_p) * fin_p + fin_p // 2
+        od_yb = od_yc - od_h // 2
         od_yt = od_yb + od_h
-        od_yc = (od_yb + od_yt) // 2
-
-        # step 3: find MD Y coordinates
-        md_yb = (od_yb + od_yt - md_h) // 2
+        # find MD Y coordinates
+        md_yb = od_yc - md_h // 2
         md_yt = md_yb + md_h
 
-        # step 3.5: update MP Y coordinates, compute M1 upper and lower bound
+        # update MP Y coordinates, compute M1 upper and lower bound
         # bottom MP
-        via_info = cls.get_ds_via_info(lch_unit, w)
-        gv0_h = via_info['h'][0]
-        top_ency = via_info['top_ency'][0]
-        gm1_delta = gv0_h // 2 + top_ency
-        mp_yt = md_yb - mp_md_sp
-        mp_yb = mp_yt - mp_h
-        mp_yc = (mp_yt + mp_yb) // 2
-        g_m1_yb = mp_yc - gm1_delta
+        bot_mp_yt = md_yb - mp_md_sp
+        bot_mp_yb = bot_mp_yt - mp_h
+        bot_mp_yc = (bot_mp_yt + bot_mp_yb) // 2
+        g_m1_yb = bot_mp_yc - g_m1_top_exty
         # top MP
-        mp_yb = md_yt + mp_md_sp
-        mp_yt = mp_yb + mp_h
-        mp_yc = (mp_yb + mp_yt) // 2
-        g_m1_yt = mp_yc + gm1_delta
+        top_mp_yb = md_yt + mp_md_sp
+        top_mp_yt = top_mp_yb + mp_h
+        top_mp_yc = (top_mp_yb + top_mp_yt) // 2
+        g_m1_yt = top_mp_yc + g_m1_top_exty
 
-        # step 4: compute PO locations
-        po_yb, po_yt = 0, cpo_top_yc
-
-        # step 5: compute layout information
-        lay_info_list = [(lay, 0, po_yb, po_yt) for lay in cls.get_mos_layers(sub_type, threshold)]
-        lr_edge_info = EdgeInfo(od_type='sub')
-
-        ds_conn_y = (g_m1_yb, g_m1_yt)
-        fill_info = FillInfo(layer=('M1', 'drawing'), exc_layer=None,
-                             x_intv_list=[], y_intv_list=[ds_conn_y])
-
-        layout_info = dict(
-            # information needed for draw_mos
-            lch_unit=lch_unit,
-            md_w=md_w,
-            fg=fg,
-            sd_pitch=sd_pitch,
-            array_box_xl=0,
-            array_box_y=(po_yb, po_yt),
-            draw_od=True,
-            row_info_list=[RowInfo(od_x_list=[(0, fg)],
-                                   od_y=(od_yb, od_yt),
-                                   od_type=('sub', sub_type),
-                                   po_y=(po_yb, po_yt),
-                                   md_y=(md_yb, md_yt)), ],
-            lay_info_list=lay_info_list,
-            adj_info_list=[],
-            left_blk_info=None,
-            right_blk_info=None,
-            fill_info_list=[fill_info],
-
-            # information needed for computing edge block layout
-            blk_type='sub',
-            imp_params=None,
-        )
-
-        mtype = (sub_type, sub_type)
-        po_types = (1,) * fg
-        ext_top_info = ExtInfo(
-            mx_margin=po_yt - g_m1_yt,
-            od_margin=po_yt - od_yt,
-            md_margin=po_yt - md_yt,
-            m1_margin=po_yt - g_m1_yt,
-            imp_min_w=0,
-            mtype=mtype,
-            thres=threshold,
-            po_types=po_types,
-            edgel_info=lr_edge_info,
-            edger_info=lr_edge_info,
-        )
-        ext_bot_info = ExtInfo(
-            mx_margin=g_m1_yb - po_yb,
-            od_margin=od_yb - po_yb,
-            md_margin=md_yb - po_yb,
-            m1_margin=g_m1_yb - po_yb,
-            imp_min_w=0,
-            mtype=mtype,
-            thres=threshold,
-            po_types=po_types,
-            edgel_info=lr_edge_info,
-            edger_info=lr_edge_info,
-        )
-
+        blk_yb, blk_yt = 0, cpo_top_yc
+        m1_y = (g_m1_yb, g_m1_yt)
+        m2_y = (od_yc - d_m2_h // 2, od_yc + d_m2_h // 2)
+        m3_y = (od_yc - d_m3_h // 2, od_yc + d_m3_h // 2)
+        d_y_list = [(md_yb, md_yt), m1_y, m2_y, m3_y]
         return dict(
-            layout_info=layout_info,
-            sd_yc=od_yc,
-            ext_top_info=ext_top_info,
-            ext_bot_info=ext_bot_info,
-            left_edge_info=(lr_edge_info, []),
-            right_edge_info=(lr_edge_info, []),
-            blk_height=po_yt,
-            gb_conn_y=ds_conn_y,
-            ds_conn_y=ds_conn_y,
+            blk=(blk_yb, blk_yt),
+            od=(od_yb, od_yt),
+            md=(md_yb, md_yt),
+            top_margins=dict(
+                od=(blk_yt - od_yt, od_spy),
+                md=(blk_yt - md_yt, md_spy),
+                m1=(blk_yt - g_m1_yt, g_m1_sple),
+                m3=(blk_yt - m3_y[1], d_m3_sple)
+            ),
+            bot_margins=dict(
+                od=(od_yb - blk_yb, od_spy),
+                md=(md_yb - blk_yb, md_spy),
+                m1=(g_m1_yb - blk_yb, g_m1_sple),
+                m3=(m3_y[0] - blk_yb, d_m3_sple),
+            ),
+            fill_info={},
+            g_y_list=[(bot_mp_yb, bot_mp_yt), (top_mp_yb, top_mp_yt)],
+            d_y_list=d_y_list,
+            s_y_list=d_y_list,
         )
-
-    @classmethod
-    def get_analog_end_info(cls, lch_unit, sub_type, threshold, fg, is_end, blk_pitch, **kwargs):
-        # type: (int, str, str, int, bool, int, **kwargs) -> Dict[str, Any]
-        """Get substrate end layout information
-
-        Layout is quite simple.  We draw the right CPO width, and extend PO so PO-CPO overlap
-        rule is satisfied.
-
-        Strategy:
-        If is not end (array abutment), just draw CPO.  If is end:
-        1. find margin between bottom coordinate and array box bottom, round up to block pitch.
-        #. Compute CPO location, and PO coordinates if we need to draw PO.
-        #. Compute implant location.
-        """
-        fin_h = cls.tech_constants['fin_h']
-        fin_p = cls.tech_constants['fin_pitch']
-        cpo_po_ency = cls.tech_constants['cpo_po_ency']
-        md_w = cls.tech_constants['md_w']
-        cpo_h = cls.tech_constants['cpo_h']
-
-        fin_p2 = fin_p // 2
-        fin_h2 = fin_h // 2
-
-        mos_constants = cls.get_mos_tech_constants(lch_unit)
-        sd_pitch = mos_constants['sd_pitch']
-
-        lr_edge_info = EdgeInfo(od_type='sub')
-        if is_end:
-            # step 1: figure out Y coordinates of CPO
-            blk_pitch = lcm([blk_pitch, fin_p])
-            # first assume top Y coordinate is 0
-            arr_yt = 0
-            cpo_bot_yt = arr_yt + cpo_h // 2
-            cpo_bot_yb = cpo_bot_yt - cpo_h
-            finbound_yb = arr_yt - fin_p2 - fin_h2
-            min_yb = min(finbound_yb, cpo_bot_yb)
-            # make sure all layers are in first quadrant
-            if min_yb < 0:
-                yshift = -(min_yb // blk_pitch) * blk_pitch
-                arr_yt += yshift
-                cpo_bot_yt += yshift
-                cpo_bot_yb += yshift
-                finbound_yb += yshift
-
-            finbound_yt = arr_yt + fin_p2 + fin_h2
-            cpo_bot_yc = (cpo_bot_yb + cpo_bot_yt) // 2
-            po_yt = arr_yt
-            po_yb = cpo_bot_yt - cpo_po_ency
-            if po_yt > po_yb:
-                adj_info_list = [AdjRowInfo(po_y=(po_yb, po_yt), po_types=(1,) * fg)]
-                adj_edge_infos = [lr_edge_info]
-            else:
-                adj_info_list = []
-                adj_edge_infos = []
-
-            lay_info_list = [(('CutPoly', 'drawing'), 0, cpo_bot_yb, cpo_bot_yt)]
-            for lay in cls.get_mos_layers(sub_type, threshold):
-                if lay[0] == 'FinArea':
-                    yb, yt = finbound_yb, finbound_yt
-                else:
-                    yb, yt = min(po_yb, cpo_bot_yc), arr_yt
-                if yt > yb:
-                    lay_info_list.append((lay, 0, yb, yt))
-        else:
-            # we just draw CPO
-            arr_yt = 0
-            cpo_h = mos_constants['cpo_h']
-            lay_info_list = [(('CutPoly', 'drawing'), 0, -cpo_h // 2, cpo_h // 2)]
-            adj_info_list = []
-            adj_edge_infos = []
-
-        layout_info = dict(
-            # information needed for draw_mos
-            lch_unit=lch_unit,
-            md_w=md_w,
-            fg=fg,
-            sd_pitch=sd_pitch,
-            array_box_xl=0,
-            array_box_y=(0, arr_yt),
-            draw_od=True,
-            row_info_list=[],
-            lay_info_list=lay_info_list,
-            adj_info_list=adj_info_list,
-            left_blk_info=None,
-            right_blk_info=None,
-            fill_info_list=[],
-
-            # information needed for computing edge block layout
-            blk_type='end',
-            imp_params=None,
-            left_edge_info=(lr_edge_info, adj_edge_infos),
-            right_edge_info=(lr_edge_info, adj_edge_infos),
-        )
-
-        return dict(
-            layout_info=layout_info,
-            left_edge_info=(lr_edge_info, adj_edge_infos),
-            right_edge_info=(lr_edge_info, adj_edge_infos),
-        )
-
-    @classmethod
-    def get_sub_ring_end_info(cls, sub_type, threshold, fg, end_ext_info, **kwargs):
-        # type: (str, str, int, ExtInfo, **kwargs) -> Dict[str, Any]
-        # TODO: add actual implementation
-        raise NotImplementedError('not implemented yet.')
-
-    @classmethod
-    def get_outer_edge_info(cls, guard_ring_nf, layout_info, is_end, adj_blk_info):
-        # type: (int, Dict[str, Any], bool, Optional[Any]) -> Dict[str, Any]
-        lch_unit = layout_info['lch_unit']
-        edge_info = cls.get_edge_info(lch_unit, guard_ring_nf, is_end)
-        outer_fg = edge_info['outer_fg']
-        cpo_xl = edge_info['cpo_xl']
-        # compute new row_info_list
-        # noinspection PyProtectedMember
-        row_info_list = [rinfo._replace(od_x_list=[]) for rinfo in layout_info['row_info_list']]
-
-        # compute new lay_info_list
-        lay_info_list = layout_info['lay_info_list']
-        imp_params = layout_info['imp_params']
-        if guard_ring_nf == 0 or imp_params is None:
-            # we keep all implant layers, just update left coordinate.
-            new_lay_list = [(lay, cpo_xl if lay[0] == 'CutPoly' else 0, yb, yt)
-                            for lay, _, yb, yt in lay_info_list]
-        else:
-            # we need to convert implant layers to substrate implants
-            # first, get all CPO layers
-            new_lay_list = [(lay, cpo_xl, yb, yt) for lay, _, yb, yt in lay_info_list if lay[0] == 'CutPoly']
-            # compute substrate implant layers
-            for mtype, thres, imp_yb, imp_yt, thres_yb, thres_yt in imp_params:
-                sub_type = 'ptap' if mtype == 'nch' or mtype == 'ptap' else 'ntap'
-                for lay in cls.get_mos_layers(sub_type, thres):
-                    cur_yb, cur_yt = imp_yb, imp_yt
-                    new_lay_list.append((lay, 0, cur_yb, cur_yt))
-
-        # compute new adj_info_list
-        adj_info_list = layout_info['adj_info_list']
-        if adj_blk_info is None:
-            adj_blk_info = (None, [None] * len(adj_info_list))
-
-        new_adj_list = []
-        if outer_fg > 0:
-            for adj_edge_info, adj_info in zip(adj_blk_info[1], adj_info_list):
-                if adj_edge_info is not None and (adj_edge_info.od_type == 'mos' or adj_edge_info.od_type == 'sub'):
-                    po_types = (0,) * (outer_fg - 1) + (1,)
-                else:
-                    po_types = (0,) * outer_fg
-                # noinspection PyProtectedMember
-                new_adj_list.append(adj_info._replace(po_types=po_types))
-
-        # compute new fill information
-        sd_pitch = layout_info['sd_pitch']
-        if outer_fg > 0:
-            mos_constants = cls.get_mos_tech_constants(lch_unit)
-            m1_w = mos_constants['mos_conn_w']
-            x_intv_list = [(sd_pitch - m1_w // 2, sd_pitch + m1_w // 2)]
-        else:
-            x_intv_list = []
-        # noinspection PyProtectedMember
-        fill_info_list = [f._replace(x_intv_list=x_intv_list) for f in layout_info['fill_info_list']]
-
-        return dict(
-            lch_unit=lch_unit,
-            md_w=layout_info['md_w'],
-            fg=outer_fg,
-            sd_pitch=sd_pitch,
-            array_box_xl=0,
-            array_box_y=layout_info['array_box_y'],
-            draw_od=True,
-            row_info_list=row_info_list,
-            lay_info_list=new_lay_list,
-            adj_info_list=new_adj_list,
-            left_blk_info=EdgeInfo(od_type=None),
-            right_blk_info=adj_blk_info[0],
-            fill_info_list=fill_info_list,
-
-            blk_type='edge' if guard_ring_nf == 0 else 'gr_edge',
-        )
-
-    @classmethod
-    def get_gr_sub_info(cls, guard_ring_nf, layout_info):
-        # type: (int, Dict[str, Any]) -> Dict[str, Any]
-
-        lch_unit = layout_info['lch_unit']
-        edge_constants = cls.get_edge_tech_constants(lch_unit)
-        gr_nf_min = edge_constants['gr_nf_min']
-        gr_sub_fg_margin = edge_constants['gr_sub_fg_margin']
-
-        if guard_ring_nf < gr_nf_min:
-            raise ValueError('guard_ring_nf = %d < %d' % (guard_ring_nf, gr_nf_min))
-
-        fg = gr_nf_min + 2 + 2 * gr_sub_fg_margin
-
-        # compute new row_info_list
-        od_x_list = [(gr_sub_fg_margin + 1, gr_sub_fg_margin + 1 + gr_nf_min)]
-        # noinspection PyProtectedMember
-        row_info_list = [rinfo._replace(od_x_list=od_x_list, od_type=('sub', rinfo.od_type[1]))
-                         for rinfo in layout_info['row_info_list']]
-
-        # compute new lay_info_list
-        lay_info_list = layout_info['lay_info_list']
-        imp_params = layout_info['imp_params']
-        if imp_params is None:
-            # don't have to recompute implant layers
-            new_lay_list = lay_info_list
-        else:
-            # we need to convert implant layers to substrate implants
-            # first, get all CPO layers
-            new_lay_list = [lay_info for lay_info in lay_info_list if lay_info[0][0] == 'CutPoly']
-            # compute substrate implant layers
-            for mtype, thres, imp_yb, imp_yt, thres_yb, thres_yt in imp_params:
-                sub_type = 'ptap' if mtype == 'nch' or mtype == 'ptap' else 'ntap'
-                for lay in cls.get_mos_layers(sub_type, thres):
-                    cur_yb, cur_yt = imp_yb, imp_yt
-                    new_lay_list.append((lay, 0, cur_yb, cur_yt))
-
-        # compute new adj_info_list
-        po_types = (0,) * gr_sub_fg_margin + (1,) * (gr_nf_min + 2) + (0,) * gr_sub_fg_margin
-        # noinspection PyProtectedMember
-        adj_info_list = [ar_info._replace(po_types=po_types) for ar_info in layout_info['adj_info_list']]
-
-        # compute new fill information
-        # noinspection PyProtectedMember
-        fill_info_list = [f._replace(x_intv_list=[]) for f in layout_info['fill_info_list']]
-
-        return dict(
-            lch_unit=lch_unit,
-            md_w=layout_info['md_w'],
-            fg=fg,
-            sd_pitch=layout_info['sd_pitch'],
-            array_box_xl=0,
-            array_box_y=layout_info['array_box_y'],
-            draw_od=True,
-            row_info_list=row_info_list,
-            lay_info_list=new_lay_list,
-            adj_info_list=adj_info_list,
-            left_blk_info=None,
-            right_blk_info=None,
-            fill_info_list=fill_info_list,
-
-            blk_type='gr_sub',
-        )
-
-    @classmethod
-    def get_gr_sep_info(cls, layout_info, adj_blk_info):
-        # type: (Dict[str, Any], Any) -> Dict[str, Any]
-
-        lch_unit = layout_info['lch_unit']
-        edge_constants = cls.get_edge_tech_constants(lch_unit)
-        fg = edge_constants['gr_sep_fg']
-
-        # compute new row_info_list
-        # noinspection PyProtectedMember
-        row_info_list = [rinfo._replace(od_x_list=[]) for rinfo in layout_info['row_info_list']]
-
-        # compute new adj_info_list
-        adj_info_list = layout_info['adj_info_list']
-        new_adj_list = []
-        for adj_edge_info, adj_info in zip(adj_blk_info[1], adj_info_list):
-            if adj_edge_info.od_type == 'mos' or adj_edge_info.od_type == 'sub':
-                po_types = (0,) * (fg - 1) + (1,)
-            else:
-                po_types = (0,) * fg
-            # noinspection PyProtectedMember
-            new_adj_list.append(adj_info._replace(po_types=po_types))
-
-        # compute new fill information
-        mos_constants = cls.get_mos_tech_constants(lch_unit)
-        m1_w = mos_constants['mos_conn_w']
-        x_intv_list = [(-m1_w // 2, m1_w // 2)]
-        # noinspection PyProtectedMember
-        fill_info_list = [f._replace(x_intv_list=x_intv_list) for f in layout_info['fill_info_list']]
-
-        return dict(
-            lch_unit=lch_unit,
-            md_w=layout_info['md_w'],
-            fg=fg,
-            sd_pitch=layout_info['sd_pitch'],
-            array_box_xl=0,
-            array_box_y=layout_info['array_box_y'],
-            draw_od=True,
-            row_info_list=row_info_list,
-            lay_info_list=layout_info['lay_info_list'],
-            adj_info_list=new_adj_list,
-            left_blk_info=None,
-            right_blk_info=adj_blk_info[0],
-            fill_info_list=fill_info_list,
-
-            blk_type='gr_sep',
-        )
-
-    @classmethod
-    def draw_mos(cls, template, layout_info):
-        # type: (TemplateBase, Dict[str, Any]) -> None
-        """Draw transistor related layout.
-
-        the layout information dictionary should contain the following entries:
-
-
-        blk_type
-            a string describing the type of this block.
-        lch_unit
-            channel length in resolution units
-        md_w
-            M0OD width in resolution units
-        fg
-            the width of this template in number of fingers
-        sd_pitch
-            the source/drain pitch of this template.
-        array_box_xl
-            array box left coordinate.  All PO X coordinates are calculated
-            relative to this point.
-        array_box_y
-            array box Y coordinates as two-element integer tuple.
-        od_type
-            the OD type in this template.  Either 'mos', 'sub', or 'dum'.
-        draw_od
-            If False, we will not draw OD in this template.  This is used for
-            supporting the ds_dummy option.
-        row_info_list
-            a list of named tuples for each transistor row we need to draw in
-            this template.
-
-            a transistor row is defines as a row of OD/PO/MD that either acts
-            as an active device or used for dummy fill purposes.  Each named tuple
-            should have the following entries:
-
-            od_x_list
-                A list of transistor X intervals in finger index.
-            od_y
-                OD Y coordinates as two-element integer tuple.
-            po_y
-                PO Y coordinates as two-element integer tuple.
-            md_y
-                MD Y coordinates as two-element integer tuple.
-        lay_info_list
-            a list of layers to draw.  Each layer information is a tuple
-            of (imp_layer, xl, yb, yt).
-        adj_info_list
-            a list of named tuples for geometries belonging to adjacent
-            rows.  Each named tuple should contain:
-
-            po_y
-                PO Y coordinates as two-element integer tuple.
-            po_types
-                list of po types.  1 for drawing, 0 for dummy.
-        left_blk_info
-            a tuple of (EdgeInfo, List[EdgeInfo]) that represents edge information
-            of the left adjacent block.  These influences the geometry abutting the
-            left block.  If None, assume default behavior.
-        right_blk_info
-            same as left_blk_info, but for the right edge.
-        fill_info_list:
-            a list of fill information named tuple.  Each tuple contains:
-
-            layer
-                the fill layer
-            exc_layer
-                the fill exclusion layer
-            x_intv_list
-                a list of X intervals of the fill
-            y_intv_list
-                a list of Y intervals of the fill
-
-        Parameters
-        ----------
-        template : TemplateBase
-            the template to draw the layout in.
-        layout_info : Dict[str, Any]
-            the layout information dictionary.
-        """
-        res = template.grid.resolution
-
-        fin_pitch = cls.tech_constants['fin_pitch']
-        fin_h = cls.tech_constants['fin_h']
-
-        fin_pitch2 = fin_pitch // 2
-        fin_h2 = fin_h // 2
-
-        blk_type = layout_info['blk_type']
-        lch_unit = layout_info['lch_unit']
-        md_w = layout_info['md_w']
-        fg = layout_info['fg']
-        sd_pitch = layout_info['sd_pitch']
-        arr_xl = layout_info['array_box_xl']
-        arr_yb, arr_yt = layout_info['array_box_y']
-        draw_od = layout_info['draw_od']
-        row_info_list = layout_info['row_info_list']
-        lay_info_list = layout_info['lay_info_list']
-        adj_info_list = layout_info['adj_info_list']
-        left_blk_info = layout_info['left_blk_info']
-        right_blk_info = layout_info['right_blk_info']
-        fill_info_list = layout_info['fill_info_list']
-
-        default_edge_info = EdgeInfo(od_type=None)
-        if left_blk_info is None:
-            if fg == 1 and right_blk_info is not None:
-                # make sure if we only have one finger, PO purpose is still chosen correctly.
-                left_blk_info = right_blk_info
-            else:
-                left_blk_info = default_edge_info
-        if right_blk_info is None:
-            if fg == 1:
-                # make sure if we only have one finger, PO purpose is still chosen correctly.
-                right_blk_info = left_blk_info
-            else:
-                right_blk_info = default_edge_info
-
-        blk_w = fg * sd_pitch + arr_xl
-
-        # figure out transistor layout settings
-        od_dum_lay = ('Active', 'dummy')
-        po_dum_lay = ('Poly', 'dummy')
-        md_lay = ('LiAct', 'drawing')
-
-        po_xc = arr_xl + sd_pitch // 2
-        # draw transistor rows
-        for row_info in row_info_list:
-            od_type = row_info.od_type[0]
-            if od_type == 'dum' or od_type is None:
-                od_lay = od_dum_lay
-            else:
-                od_lay = ('Active', 'drawing')
-            od_x_list = row_info.od_x_list
-            od_yb, od_yt = row_info.od_y
-            po_yb, po_yt = row_info.po_y
-            md_yb, md_yt = row_info.md_y
-
-            po_on_od = [False] * fg
-            md_on_od = [False] * (fg + 1)
-            if od_yt > od_yb:
-                # draw OD and figure out PO/MD info
-                for od_start, od_stop in od_x_list:
-                    # mark PO/MD indices that are on OD
-                    if od_start - 1 >= 0:
-                        po_on_od[od_start - 1] = True
-                    for idx in range(od_start, od_stop + 1):
-                        md_on_od[idx] = True
-                        if idx < fg:
-                            po_on_od[idx] = True
-
-                    if draw_od:
-                        od_xl = po_xc - lch_unit // 2 + (od_start - 1) * sd_pitch
-                        od_xr = po_xc + lch_unit // 2 + od_stop * sd_pitch
-                        template.add_rect(od_lay, BBox(od_xl, od_yb, od_xr, od_yt, res, unit_mode=True))
-
-            # draw PO
-            if po_yt > po_yb:
-                for idx in range(fg):
-                    po_xl = po_xc + idx * sd_pitch - lch_unit // 2
-                    po_xr = po_xl + lch_unit
-                    if po_on_od[idx]:
-                        cur_od_type = od_type
-                        is_edge = False
-                    else:
-                        if idx == 0:
-                            cur_od_type = left_blk_info.od_type
-                            is_edge = True
-                        elif idx == fg - 1:
-                            cur_od_type = right_blk_info.od_type
-                            is_edge = True
-                        else:
-                            cur_od_type = None
-                            is_edge = False
-
-                    if is_edge and cur_od_type is not None:
-                        lay = ('Poly', 'edge')
-                    elif cur_od_type == 'mos' or cur_od_type == 'sub':
-                        lay = ('Poly', 'drawing')
-                    else:
-                        lay = ('Poly', 'dummy')
-                    template.add_rect(lay, BBox(po_xl, po_yb, po_xr, po_yt, res, unit_mode=True))
-
-            # draw MD if it's physical
-            if md_yt > md_yb and fg > 0:
-                md_range = range(1, fg) if blk_type == 'gr_sub' else range(fg + 1)
-                for idx in md_range:
-                    md_xl = arr_xl + idx * sd_pitch - md_w // 2
-                    md_xr = md_xl + md_w
-                    if md_on_od[idx]:
-                        template.add_rect(md_lay, BBox(md_xl, md_yb, md_xr, md_yt, res, unit_mode=True))
-
-        # draw other layers
-        for imp_lay, xl, yb, yt in lay_info_list:
-            if imp_lay[0] == 'FinArea':
-                # round to fin grid
-                yb = (yb - fin_pitch2 + fin_h2) // fin_pitch * fin_pitch + fin_pitch2 - fin_h2
-                yt = -(-(yt - fin_pitch2 - fin_h2) // fin_pitch) * fin_pitch + fin_pitch2 + fin_h2
-            box = BBox(xl, yb, blk_w, yt, res, unit_mode=True)
-            if box.is_physical():
-                template.add_rect(imp_lay, box)
-
-        # draw adjacent row geometries
-        for adj_info in adj_info_list:
-            po_yb, po_yt = adj_info.po_y
-            for idx, po_type in enumerate(adj_info.po_types):
-                lay = po_dum_lay if po_type == 0 else ('Poly', 'drawing')
-                po_xl = po_xc + idx * sd_pitch - lch_unit // 2
-                po_xr = po_xl + lch_unit
-                template.add_rect(lay, BBox(po_xl, po_yb, po_xr, po_yt, res, unit_mode=True))
-
-        # set size and add PR boundary
-        arr_box = BBox(arr_xl, arr_yb, blk_w, arr_yt, res, unit_mode=True)
-        bound_box = arr_box.extend(x=0, y=0, unit_mode=True)
-        template.array_box = arr_box
-        template.prim_bound_box = bound_box
-        if bound_box.is_physical():
-            template.add_cell_boundary(bound_box)
-
-            # draw metal fill.  This only needs to be done if the template has nonzero area.
-            for fill_info in fill_info_list:
-                exc_lay = fill_info.exc_layer
-                lay = fill_info.layer
-                x_intv_list = fill_info.x_intv_list
-                y_intv_list = fill_info.y_intv_list
-                if exc_lay is not None:
-                    template.add_rect(exc_lay, bound_box)
-                for xl, xr in x_intv_list:
-                    for yb, yt in y_intv_list:
-                        template.add_rect(lay, BBox(xl, yb, xr, yt, res, unit_mode=True))
 
     @classmethod
     def draw_substrate_connection(cls, template, layout_info, port_tracks, dum_tracks, dummy_only,
