@@ -255,7 +255,7 @@ mos:
   # minimum horizontal space between OD, in resolution units
   od_spx: 50
   # minimum vertical space between OD, in resolution units
-  od_spy_min: 10
+  od_spy: 10
   # maximum vertical space between OD, in resolution units
   od_spy_max: 514
   # OD quantization pitch.
@@ -374,6 +374,10 @@ mos:
   po_od_exty:
     lch: [.inf]
     val: [10]
+  # gate wire widths
+  w_conn_g: [40, 40, 40]
+  # drain wire widths
+  w_conn_d: [40, 40, 40]
   # gate via parameters
   via_g:
     dim:

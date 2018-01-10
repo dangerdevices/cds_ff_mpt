@@ -2,7 +2,7 @@
 
 from abs_templates_ec.analog_mos.finfet import MOSTechFinfetBase
 
-from typing import TYPE_CHECKING, Dict, Any, Union, List, Optional
+from typing import TYPE_CHECKING, Dict, Any, List, Optional
 
 from bag.math import lcm
 from bag.layout.util import BBox
@@ -50,149 +50,121 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         mos_constants = self.get_mos_tech_constants(lch_unit)
         fin_h = mos_constants['fin_h']
         fin_p = mos_constants['mos_pitch']
-
+        od_spy = mos_constants['od_spy']
         mp_cpo_sp = mos_constants['mp_cpo_sp']
         mp_h = mos_constants['mp_h']
         cpo_od_sp = mos_constants['cpo_od_sp']
-        md_w = mos_constants['md_w']
         cpo_h = mos_constants['cpo_h']
-        sd_pitch = mos_constants['sd_pitch']
+        md_h_min = mos_constants['md_h_min']
+        md_od_exty = mos_constants['md_od_exty']
+        md_spy = mos_constants['md_spy']
         mos_conn_w = mos_constants['mos_conn_w']
         vg_info = mos_constants['via_g']
         vd_info = mos_constants['via_d']
+        w_conn_g = mos_constants['w_conn_g']
+        w_conn_d = mos_constants['w_conn_d']
 
-        mx_spy_min = self.tech_info.get_min_line_end_space_unit('M3', mos_conn_w)
+        d_m2_h = w_conn_d[1]
+        my_spy = self.tech_info.get_min_line_end_space_unit('1x', mos_conn_w)
+        my_h_min = self.tech_info.get_min_length_unit('1x', mos_conn_w)
+        mx_spy = self.tech_info.get_min_space_unit('1x', d_m2_h)
 
+        # compute gate/drain connection parameters
         gv0_h = vg_info['dim'][0][1]
+        gv2_h = vg_info['dim'][2][1]
         gv0_m1_ency = vg_info['top_enc_le'][0]
+        gv2_m3_ency = vg_info['top_enc_le'][2]
+        g_m1_exty = gv0_h // 2 + gv0_m1_ency
+        g_m3_exty = gv2_h // 2 + gv2_m3_ency
+        g_m1_h = max(2 * g_m1_exty, my_h_min)
+        g_m3_h = max(2 * g_m3_exty, my_h_min)
+        g_m2_h = w_conn_g[1]
 
-        # step 1: place bottom CPO, compute gate/OD locations
-        # step 1A: get CPO location
+        dv1_h = vd_info['dim'][1][1]
+        dv2_h = vd_info['dim'][2][1]
+        dv1_m1_ency = vd_info['bot_enc_le'][1]
+        dv2_m3_ency = vd_info['top_enc_le'][2]
+        d_m1_exty = dv1_h // 2 + dv1_m1_ency
+        d_m3_exty = dv2_h // 2 + dv2_m3_ency
+
+        od_h = (w - 1) * fin_p + fin_h
+        md_h = max(od_h + 2 * md_od_exty, md_h_min)
+        d_m1_h = max(my_h_min, 2 * d_m1_exty + d_m2_h + mx_spy)
+        d_m3_h = max(my_h_min, 2 * d_m3_exty)
+
+        # place bottom CPO, compute gate/OD locations
         blk_yb = 0
         cpo_bot_yb = blk_yb - cpo_h // 2
         cpo_bot_yt = cpo_bot_yb + cpo_h
-        # step 1B: get gate via/M1 location
+        # get gate via/M1 location
         mp_yb = cpo_bot_yt + mp_cpo_sp
         mp_yt = mp_yb + mp_h
         mp_yc = (mp_yt + mp_yb) // 2
-        g_m1_yt = mp_yc + gv0_h // 2 + gv0_m1_ency
-        # step 1C: get OD location, round to fin grid.
-        od_yc = g_m1_yt + mx_spy_min + m1_h // 2
+        g_m1_yt = mp_yc + g_m1_exty
+        # get OD location, round to fin grid.
+        od_yc = g_m1_yt + my_spy + md_h // 2
         if w % 2 == 0:
             od_yc = -(-od_yc // fin_p) * fin_p
         else:
             od_yc = -(-(od_yc - fin_p // 2) // fin_p) * fin_p + fin_p // 2
         # compute OD/MD/CMD location
-        od_h = (w - 1) * fin_p + fin_h
         od_yb = od_yc - od_h // 2
         od_yt = od_yb + od_h
         md_yb = od_yc - md_h // 2
         md_yt = md_yb + md_h
-        ds_m1_yb = od_yc - m1_h // 2
-        ds_m1_yt = ds_m1_yb + m1_h
+        d_m1_yb = md_yb
+        d_m1_yt = d_m1_yb + d_m1_h
         # update gate location
-        g_m1_yt = ds_m1_yb - mx_spy_min
+        g_m1_yt = d_m1_yb - my_spy
         g_m1_yb = g_m1_yt - g_m1_h
-        g_m1_yc = (g_m1_yb + g_m1_yt) // 2
+        g_m2_yc = g_m1_yt - g_m1_exty
 
-        # step 2: compute top CPO location.
+        # compute top CPO location.
         blk_yt = od_yt + cpo_od_sp + cpo_h // 2
         blk_yt = -(-blk_yt // fin_p) * fin_p
 
-        # step 3: compute gate M2/M3 locations
-        g_m2_yt = g_m1_yc + gv1_h // 2 + g_m2_ency
+        # compute gate M2/M3 locations
+        g_m2_yt = g_m2_yc + g_m2_h // 2
         g_m2_yb = g_m2_yt - g_m2_h
-        g_m2_yc = (g_m2_yb + g_m2_yt) // 2
-        g_m3_yt = g_m2_yc + g_m3_h // 2
+        g_m3_yt = g_m2_yc + g_m3_exty
         g_m3_yb = g_m3_yt - g_m3_h
 
-        # step 4: compute drain/source M3 location when going up.  This is needed for metal 3 margin.
-        d_v1_yc = ds_m1_yt - ds_m1_bot_ency - dv1_h // 2
-        d_m3_yb = d_v1_yc - dv2_h // 2 - d_m3_ency
-        d_m3_yt = d_m3_yb + m3_h
+        # compute source wire location
+        s_m2_yc = d_m1_yb + d_m1_exty
+        s_m2_yb = s_m2_yc - d_m2_h // 2
+        s_m2_yt = s_m2_yb + d_m2_h
+        s_m3_yb = s_m2_yc - d_m3_h // 2
+        s_m3_yt = s_m3_yb + d_m3_h
+        # compute drain wire location
+        d_m2_yb = s_m2_yt + mx_spy
+        d_m2_yt = d_m2_yb + d_m2_h
+        d_m2_yc = (d_m2_yb + d_m2_yt) // 2
+        d_m3_yb = d_m2_yc - d_m3_h // 2
+        d_m3_yt = d_m3_yb + d_m3_h
 
-        s_v1_yc = ds_m1_yb + ds_m1_bot_ency + dv1_h // 2
-        s_m3_yt = s_v1_yc + dv2_h // 2 + d_m3_ency
-        s_m3_yb = s_m3_yt - m3_h
-
-        # step 5: compute extension information
-        lr_edge_info = EdgeInfo(od_type='mos')
-
-        mtype = (mos_type, mos_type)
-        po_types = (1,) * fg
-        ext_top_info = ExtInfo(
-            mx_margin=blk_yt - d_m3_yt,
-            od_margin=blk_yt - od_yt,
-            md_margin=blk_yt - md_yt,
-            m1_margin=blk_yt - ds_m1_yt,
-            imp_min_w=0,
-            mtype=mtype,
-            thres=threshold,
-            po_types=po_types,
-            edgel_info=lr_edge_info,
-            edger_info=lr_edge_info,
-        )
-        ext_bot_info = ExtInfo(
-            mx_margin=g_m3_yb - blk_yb,
-            od_margin=od_yb - blk_yb,
-            md_margin=md_yb - blk_yb,
-            m1_margin=g_m1_yb - blk_yb,
-            imp_min_w=0,
-            mtype=mtype,
-            thres=threshold,
-            po_types=po_types,
-            edgel_info=lr_edge_info,
-            edger_info=lr_edge_info,
-        )
-
-        # step 6: compute layout information
-        lay_info_list = []
-        for lay in cls.get_mos_layers(mos_type, threshold):
-            lay_info_list.append((lay, 0, blk_yb, blk_yt))
-
-        sub_type = 'ptap' if mos_type == 'nch' else 'ntap'
-        fill_info = FillInfo(layer=('M1', 'drawing'), exc_layer=None,
-                             x_intv_list=[], y_intv_list=[(ds_m1_yb, ds_m1_yt)])
-        layout_info = dict(
-            # information needed for draw_mos
-            lch_unit=lch_unit,
-            md_w=md_w,
-            fg=fg,
-            sd_pitch=sd_pitch,
-            array_box_xl=0,
-            array_box_y=(blk_yb, blk_yt),
-            draw_od=not kwargs.get('ds_dummy', False),
-            row_info_list=[RowInfo(od_x_list=[(0, fg)],
-                                   od_y=(od_yb, od_yt),
-                                   od_type=('mos', sub_type),
-                                   po_y=(blk_yb, blk_yt),
-                                   md_y=(md_yb, md_yt)), ],
-            lay_info_list=lay_info_list,
-            adj_info_list=[],
-            left_blk_info=None,
-            right_blk_info=None,
-            fill_info_list=[fill_info],
-
-            # information needed for computing edge block layout
-            blk_type='mos',
-            imp_params=[(mos_type, threshold, blk_yb, blk_yt, blk_yb, blk_yt)],
-        )
-
-        # step 8: return results
         return dict(
-            layout_info=layout_info,
-            ext_top_info=ext_top_info,
-            ext_bot_info=ext_bot_info,
-            left_edge_info=(lr_edge_info, []),
-            right_edge_info=(lr_edge_info, []),
-            sd_yc=od_yc,
-            g_conn_y=(g_m3_yb, g_m3_yt),
-            d_conn_y=(d_m3_yb, d_m3_yt),
-            s_conn_y=(s_m3_yb, s_m3_yt),
-            gate_yc=g_m2_yc,
-            m3_w=m3_w,
-            sd_pitch=sd_pitch,
-            num_sd_per_track=1,
+            blk=(blk_yb, blk_yt),
+            od=(od_yb, od_yt),
+            md=(md_yb, md_yt),
+            top_margins=dict(
+                od=(blk_yt - od_yt, od_spy),
+                md=(blk_yt - md_yt, md_spy),
+                m1=(blk_yt - d_m1_yt, my_spy),
+                m3=(blk_yt - d_m3_yt, my_spy)
+            ),
+            bot_margins=dict(
+                od=(od_yb - blk_yb, od_spy),
+                md=(md_yb - blk_yb, md_spy),
+                m1=(g_m1_yb - blk_yb, my_spy),
+                m3=(g_m3_yb - blk_yb, my_spy),
+            ),
+            fill_info={},
+            g_y_list=[(mp_yb, mp_yt), (g_m1_yb, g_m1_yt),
+                      (g_m2_yb, g_m2_yt), (g_m3_yb, g_m3_yt)],
+            d_y_list=[(md_yb, md_yt), (d_m1_yb, d_m1_yt),
+                      (d_m2_yb, d_m2_yt), (d_m3_yb, d_m3_yt)],
+            s_y_list=[(md_yb, md_yt), (d_m1_yb, d_m1_yt),
+                      (s_m2_yb, s_m2_yt), (s_m3_yb, s_m3_yt)],
         )
 
     @classmethod
