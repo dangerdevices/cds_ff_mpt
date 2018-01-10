@@ -2,11 +2,12 @@
 
 from abs_templates_ec.analog_mos.finfet import MOSTechFinfetBase
 
-from typing import TYPE_CHECKING, Dict, Any, List, Optional
+from typing import TYPE_CHECKING, Dict, Any, List, Tuple
 
 from bag.math import lcm
 from bag.layout.util import BBox
 from bag.layout.template import TemplateBase
+from bag.layout.routing import WireArray
 
 if TYPE_CHECKING:
     from bag.layout.tech import TechInfoConfig
@@ -268,6 +269,24 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
             d_y_list=d_y_list,
             s_y_list=d_y_list,
         )
+
+    def draw_ds_connection(self,
+                           template,  # type: TemplateBase
+                           fg,  # type: int
+                           wire_pitch,  # type: int
+                           xc,  # type: int
+                           od_y,  # type: Tuple[int, int]
+                           md_y,  # type: Tuple[int, int]
+                           dum_x_list,  # type: List[int]
+                           conn_x_list,  # type: List[int]
+                           align_gate,  # type: bool
+                           wire_dir,  # type: int
+                           ds_code=3,  # type: int
+                           ):
+        # type: (...) -> Tuple[List[WireArray], List[WireArray]]
+
+
+        return [], []
 
     @classmethod
     def draw_substrate_connection(cls, template, layout_info, port_tracks, dum_tracks, dummy_only,
