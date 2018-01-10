@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Dict, Any, List, Tuple
 from bag.math import lcm
 from bag.layout.util import BBox
 from bag.layout.template import TemplateBase
-from bag.layout.routing import WireArray
+from bag.layout.routing import WireArray, TrackID
 
 if TYPE_CHECKING:
     from bag.layout.tech import TechInfoConfig
@@ -299,8 +299,9 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
             fill_info={},
         )
 
-    def draw_ds_connection(self,
+    def draw_ds_connection(self,  # type: MOSTechCDSFFMPT
                            template,  # type: TemplateBase
+                           lch_unit,  # type: int
                            fg,  # type: int
                            wire_pitch,  # type: int
                            xc,  # type: int
@@ -310,11 +311,101 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
                            conn_x_list,  # type: List[int]
                            align_gate,  # type: bool
                            wire_dir,  # type: int
-                           ds_code=3,  # type: int
+                           ds_code,  # type: int
                            ):
         # type: (...) -> Tuple[List[WireArray], List[WireArray]]
 
-        return [], []
+        res = self.res
+        mos_lay_table = self.config['mos_layer_table']
+        lay_name_table = self.config['layer_name']
+        via_id_table = self.config['via_id']
+
+        mos_constants = self.get_mos_tech_constants(lch_unit)
+        md_w = mos_constants['md_w']
+        bot_layer = mos_constants['d_bot_layer']
+        via_info = mos_constants['d_via']
+
+        is_sub = (ds_code == 3)
+        conn_yloc_info = self.get_conn_yloc_info(lch_unit, od_y, md_y, is_sub)
+        conn_drc_info = self.get_conn_drc_info(lch_unit, 'd')
+
+        dum_layer = self.get_dum_conn_layer()
+        mos_layer = self.get_mos_conn_layer()
+        dum_warrs, conn_warrs = [], []
+
+        if is_sub:
+            via_x_list = list(range(xc, xc + (fg + 1) * wire_pitch, wire_pitch))
+            conn_y_list = conn_yloc_info['d_y_list']
+        else:
+            if ds_code == 1:
+                via_x_list = list(range(xc, xc + (fg + 1) * wire_pitch, 2 * wire_pitch))
+            else:
+                via_x_list = list(range(xc, xc + (fg + 1) * wire_pitch, 2 * wire_pitch))
+            if align_gate:
+                conn_y_list = conn_yloc_info['d_y_list']
+            else:
+                conn_y_list = conn_yloc_info['s_y_list']
+
+        lay_list = range(bot_layer, bot_layer + len(conn_y_list))
+        (prev_yb, prev_yt), prev_dir, prev_w, prev_lay_name = md_y, 'y', md_w, mos_lay_table['MD']
+        for cur_lay, (cur_yb, cur_yt), (via_w, via_h), via_sp, bot_ency, top_ency in \
+                zip(lay_list, conn_y_list, via_info['dim'], via_info['sp'],
+                    via_info['bot_enc_le'], via_info['top_enc_le']):
+            drc_info = conn_drc_info[cur_lay]
+            cur_w = drc_info['w']
+            cur_dir = drc_info['direction']
+            cur_min_len = drc_info['min_len']
+            cur_lay_name = lay_name_table[cur_lay]
+            via_id = via_id_table[(prev_lay_name, cur_lay_name)]
+
+            # get via Y coord, via enclosures, number of vias, and metal X interval (if horizontal)
+            cur_xl = cur_xr = None
+            bot_encx = top_encx = (prev_w - via_w) // 2, (cur_w - via_w) // 2
+            if prev_dir == cur_dir:
+                # must be both vertical
+                arr_yb = max(prev_yb + bot_ency, cur_yb + top_ency)
+                arr_yt = min(prev_yt - bot_ency, cur_yt - top_ency)
+                num_rows = (arr_yt - arr_yb + via_sp) // (via_h + via_sp)
+                via_yc = (arr_yt + arr_yb) // 2
+            else:
+                num_rows = 1
+                if cur_dir == 'x':
+                    via_yc = (cur_yb + cur_yt) // 2
+                    top_encx, top_ency = top_ency, (cur_w - via_h) // 2
+                    extx = via_w // 2 + top_encx
+                    # get metal X interval
+                    cur_xl, cur_xr = via_x_list[0] - extx, via_x_list[-1] + extx
+                    if cur_min_len > cur_xr - cur_xl:
+                        cur_xl = (cur_xr + cur_xl - cur_min_len) // 2
+                        cur_xr = cur_xl + cur_min_len
+                else:
+                    via_yc = (prev_yb + prev_yt) // 2
+                    bot_encx, bot_ency = bot_ency, (prev_w - via_h) // 2
+
+            # draw vias and wire(s)
+            enc1 = [bot_encx, bot_encx, bot_ency, bot_ency]
+            enc2 = [top_encx, top_encx, top_ency, top_ency]
+            for via_xc in via_x_list:
+                template.add_via_primitive(via_id, [via_xc, via_yc], num_rows=num_rows, sp_rows=via_sp,
+                                           enc1=enc1, enc2=enc2, cut_width=via_w, cut_height=via_h,
+                                           unit_mode=True)
+                if cur_dir == 'y':
+                    template.add_rect(cur_lay_name, BBox(via_xc - cur_w // 2, cur_yb, via_xc + cur_w // 2, cur_yt,
+                                                         res, unit_mode=True))
+            if cur_dir == 'x':
+                template.add_rect(cur_lay_name, BBox(cur_xl, cur_yb, cur_xr, cur_yt, res, unit_mode=True))
+
+        # add WireArrays
+        cur_yb, cur_yt = conn_y_list[dum_layer - bot_layer]
+        for conn_xc in dum_x_list:
+            tidx = template.grid.coord_to_track(dum_layer, conn_xc, unit_mode=True)
+            dum_warrs.append(WireArray(TrackID(dum_layer, tidx), cur_yb * res, cur_yt * res))
+        cur_yb, cur_yt = conn_y_list[mos_layer - bot_layer]
+        for conn_xc in conn_x_list:
+            tidx = template.grid.coord_to_track(mos_layer, conn_xc, unit_mode=True)
+            conn_warrs.append(WireArray(TrackID(mos_layer, tidx), cur_yb * res, cur_yt * res))
+
+        return dum_warrs, conn_warrs
 
     @classmethod
     def draw_substrate_connection(cls, template, layout_info, port_tracks, dum_tracks, dummy_only,
