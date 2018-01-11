@@ -420,11 +420,15 @@ mos:
     - !!python/tuple [dnw, drawing]
   # implant layer names for each transistor/substrate tap type.
   imp_layers:
-    nch: {}
+    nch:
+      !!python/tuple ['FinArea', 'fin48']: [10, 50]
     pch:
+      !!python/tuple ['FinArea', 'fin48']: [10, 50]
       !!python/tuple ['NWell', 'drawing']: [10, 50]
-    ptap: {}
+    ptap:
+      !!python/tuple ['FinArea', 'fin48']: [10, 50]
     ntap:
+      !!python/tuple ['FinArea', 'fin48']: [10, 50]
       !!python/tuple ['NWell', 'drawing']: [10, 50]
   # threshold layer names for each transistor/substrate tap type.
   thres_layers:
