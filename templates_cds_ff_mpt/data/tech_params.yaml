@@ -287,33 +287,47 @@ mos:
   dig_conn_layer: 1
   # LaygoBase top layer.
   dig_top_layer: 2
-  # horizontal enclosure of implant layers over OD
-  imp_od_encx: 65
   # minimum OD density
   od_min_density: 0.20
   # dummy OD height range, in number of fins
   od_fill_h: !!python/tuple [2, 20]
   # dummy OD maximum width, in resolution units.
   od_fill_w_max: !!null
+  # horizontal enclosure of implant layers over OD
+  imp_od_encx: 65
   # implant layers vertical enclosure of active.
   # this is used to figure out where to separate implant layers in extension blocks,
   imp_od_ency: 45
+  # minimum implant layer width
+  imp_min_w: 160
   # overlap between NW layer and DNW layer.
   nw_dnw_ovl: 100
   # extension of NW layer over DNW layer.
   nw_dnw_ext: 100
-  # space between MP and CPO
-  mp_cpo_sp: 19
+  # substrate MP height
+  mp_h_sub: 40
+  # substrate MP vertical space
+  mp_spy_sub: 34
+  # substrate MP extension/overlap over PO
+  mp_po_ovl_const_sub: [16, 0]
+  # substrate MP space to MD
+  mp_md_sp_sub: 13
+  # substrate MP space to CPO
+  mp_cpo_sp_sub: 19
   # MP height
   mp_h: 40
-  # MP and PO overlap
-  mp_po_ovl: 16
-  # space bewteen MP and MD
-  mp_md_sp: 13
   # vertical space between MP
   mp_spy: 34
-  # drain/source M2 space
-  ds_m2_sp: 50
+  # MP and PO overlap
+  mp_po_ovl_const: [16, 0]
+  # space bewteen MP and MD
+  mp_md_sp: 13
+  # space between MP and CPO
+  mp_cpo_sp: 19
+  # normal CPO height
+  cpo_h:
+    lch: [.inf]
+    val: [60]
   # horizontal extension of CPO beyond PO
   cpo_po_extx:
     lch: [.inf]
@@ -330,8 +344,8 @@ mos:
   cpo_spy:
     lch: [.inf]
     val: [90]
-  # normal CPO height
-  cpo_h:
+  # CPO height for substrate end
+  cpo_h_end:
     lch: [.inf]
     val: [60]
   # MD width
@@ -415,6 +429,8 @@ mos:
     sp: [32, 42, 42]
     bot_enc_le: [18, 20, 10]
     top_enc_le: [40, 10, 20]
+  # drain/source M2 space
+  ds_m2_sp: 50
   # DNW layer names
   dnw_layers:
     - !!python/tuple [dnw, drawing]
