@@ -299,7 +299,7 @@ mos:
   # this is used to figure out where to separate implant layers in extension blocks,
   imp_od_ency: 45
   # minimum implant layer width
-  imp_min_w: 160
+  imp_min_w: 52
   # overlap between NW layer and DNW layer.
   nw_dnw_ovl: 100
   # extension of NW layer over DNW layer.
