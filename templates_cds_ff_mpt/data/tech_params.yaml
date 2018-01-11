@@ -19,6 +19,8 @@ mos_layer_table:
   OD: !!python/tuple ['Active', 'drawing']
   # dummy active
   OD_dummy: !!python/tuple ['Active', 'dummy']
+  # gate connection metal
+  MP: !!python/tuple ['LiPo', 'drawing']
   # OD connection metal
   MD: !!python/tuple ['LiAct', 'drawing']
   # dummy OD connection metal
@@ -26,7 +28,7 @@ mos_layer_table:
   # cut poly
   CPO: !!python/tuple ['CutPoly', 'drawing']
   # fin boundary layer
-  FB: !!python/tuple ['FinArea', 'drawing']
+  FB: !!python/tuple ['FinArea', 'fin48']
 
 # mapping from resistor layer name to actual layer/purpose tuple
 res_layer_table:
@@ -250,6 +252,8 @@ dnw_margins:
 
 # transistor DRC rules.
 mos:
+  # True if PODE is a special poly layer
+  pode_is_poly: True
   # fin height
   fin_h: 14
   # minimum horizontal space between OD, in resolution units
@@ -415,24 +419,64 @@ mos:
   imp_layers:
     nch: {}
     pch:
-      !!python/tuple [nw, drawing]: [10, 50]
+      !!python/tuple ['NWell', 'drawing']: [10, 50]
     ptap: {}
     ntap:
-      !!python/tuple [nw, drawing]: [10, 50]
+      !!python/tuple ['NWell', 'drawing']: [10, 50]
   # threshold layer names for each transistor/substrate tap type.
   thres_layers:
     nch:
       standard:
-        !!python/tuple [th_n, drawing]: [10, 50]
+        !!python/tuple ['Nsvt', 'drawing']: [10, 50]
+      fast:
+        !!python/tuple ['Nlvt', 'drawing']: [10, 50]
+      low_power:
+        !!python/tuple ['Nhvt', 'drawing']: [10, 50]
+      svt:
+        !!python/tuple ['Nsvt', 'drawing']: [10, 50]
+      lvt:
+        !!python/tuple ['Nlvt', 'drawing']: [10, 50]
+      hvt:
+        !!python/tuple ['Nhvt', 'drawing']: [10, 50]
     pch:
       standard:
-        !!python/tuple [th_p, drawing]: [10, 50]
+        !!python/tuple ['Psvt', 'drawing']: [10, 50]
+      fast:
+        !!python/tuple ['Plvt', 'drawing']: [10, 50]
+      low_power:
+        !!python/tuple ['Phvt', 'drawing']: [10, 50]
+      svt:
+        !!python/tuple ['Psvt', 'drawing']: [10, 50]
+      lvt:
+        !!python/tuple ['Plvt', 'drawing']: [10, 50]
+      hvt:
+        !!python/tuple ['Phvt', 'drawing']: [10, 50]
     ptap:
       standard:
-        !!python/tuple [th_n, drawing]: [10, 50]
+        !!python/tuple ['Psvt', 'drawing']: [10, 50]
+      fast:
+        !!python/tuple ['Plvt', 'drawing']: [10, 50]
+      low_power:
+        !!python/tuple ['Phvt', 'drawing']: [10, 50]
+      svt:
+        !!python/tuple ['Psvt', 'drawing']: [10, 50]
+      lvt:
+        !!python/tuple ['Plvt', 'drawing']: [10, 50]
+      hvt:
+        !!python/tuple ['Phvt', 'drawing']: [10, 50]
     ntap:
       standard:
-        !!python/tuple [th_p, drawing]: [10, 50]
+        !!python/tuple ['Nsvt', 'drawing']: [10, 50]
+      fast:
+        !!python/tuple ['Nlvt', 'drawing']: [10, 50]
+      low_power:
+        !!python/tuple ['Nhvt', 'drawing']: [10, 50]
+      svt:
+        !!python/tuple ['Nsvt', 'drawing']: [10, 50]
+      lvt:
+        !!python/tuple ['Nlvt', 'drawing']: [10, 50]
+      hvt:
+        !!python/tuple ['Nhvt', 'drawing']: [10, 50]
 
 # PO resistor DRC rules
 resistor:
