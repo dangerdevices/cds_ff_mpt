@@ -188,9 +188,9 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
 
         conn_info = self.get_conn_yloc_info(lch_unit, (od_yb, od_yt), (md_yb, md_yt), False)
         d_m1_yt = conn_info['d_y_list'][0][1]
-        d_m3_yt = conn_info['d_y_list'][2][1]
+        d_m3_yb, d_m3_yt = conn_info['d_y_list'][2]
         g_m1_yb = conn_info['g_y_list'][0][0]
-        g_m3_yb = conn_info['g_y_list'][2][0]
+        g_m3_yb, g_m3_yt = conn_info['g_y_list'][2]
         return dict(
             blk=(blk_yb, blk_yt),
             od=(od_yb, od_yt),
@@ -208,6 +208,8 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
                 m3=(g_m3_yb - blk_yb, d_m3_sple),
             ),
             fill_info={},
+            g_conn_y=(g_m3_yb, g_m3_yt),
+            d_conn_y=(g_m3_yb, g_m3_yt),
         )
 
     def get_sub_yloc_info(self, lch_unit, w, sub_type, threshold, fg, **kwargs):
@@ -299,6 +301,8 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
                 m3=(m3_yb - blk_yb, d_m3_sple),
             ),
             fill_info={},
+            g_conn_y=(m3_yb, m3_yt),
+            d_conn_y=(m3_yb, m3_yt),
         )
 
     def up_one_layer(self, template, cur_lay, cur_y, via_dim, via_sp, via_ble, via_tle,
@@ -323,7 +327,7 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         # get via Y coord, via enclosures, number of vias, and metal X interval (if horizontal)
         cur_xl = cur_xr = None
         bot_ency, top_ency = via_ble, via_tle
-        bot_encx = top_encx = (prev_w - via_w) // 2, (cur_w - via_w) // 2
+        bot_encx, top_encx = (prev_w - via_w) // 2, (cur_w - via_w) // 2
         if prev_dir == cur_dir:
             # must be both vertical
             arr_yb = max(prev_yb + via_ble, cur_yb + via_tle)
