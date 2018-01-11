@@ -212,10 +212,10 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         fin_h = mos_constants['fin_h']
         fin_p = mos_constants['mos_pitch']
         od_spy = mos_constants['od_spy']
-        mp_cpo_sp = mos_constants['mp_cpo_sp']
-        mp_h = mos_constants['mp_h']
-        mp_spy = mos_constants['mp_spy']
-        mp_md_sp = mos_constants['mp_md_sp']
+        mp_cpo_sp_sub = mos_constants['mp_cpo_sp_sub']
+        mp_h_sub = mos_constants['mp_h_sub']
+        mp_spy_sub = mos_constants['mp_spy_sub']
+        mp_md_sp_sub = mos_constants['mp_md_sp_sub']
         cpo_h = mos_constants['cpo_h']
         md_h_min = mos_constants['md_h_min']
         md_od_exty = mos_constants['md_od_exty']
@@ -234,10 +234,10 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         # figure out Y coordinate of bottom CPO
         cpo_bot_yt = cpo_h // 2
         # find bottom M0_PO coordinate
-        mp_yb = max(mp_spy // 2, cpo_bot_yt + mp_cpo_sp)
-        mp_yt = mp_yb + mp_h
+        mp_yb = max(mp_spy_sub // 2, cpo_bot_yt + mp_cpo_sp_sub)
+        mp_yt = mp_yb + mp_h_sub
         # find first-pass OD coordinate
-        od_yc = mp_yt + mp_md_sp + md_h // 2
+        od_yc = mp_yt + mp_md_sp_sub + md_h // 2
         if w % 2 == 0:
             od_yc = -(-od_yc // fin_p) * fin_p
         else:
@@ -439,8 +439,10 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         via_id_table = self.config['via_id']
 
         mos_constants = self.get_mos_tech_constants(lch_unit)
-        mp_po_ovl = mos_constants['mp_po_ovl']
+        mp_po_ovl_constants = mos_constants['mp_po_ovl_constants']
+        mp_po_ovl_constants_sub = mos_constants['mp_po_ovl_constants_sub']
         mp_h = mos_constants['mp_h']
+        mp_h_sub = mos_constants['mp_h_sub']
         via_info = mos_constants['g_via']
 
         conn_yloc_info = self.get_conn_yloc_info(lch_unit, od_y, md_y, is_sub)
@@ -453,12 +455,13 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         mp_y_list = conn_yloc_info['mp_y_list']
         v0_id = via_id_table[(mos_lay_table['PO'], lay_name_table[1])]
         if is_sub:
+            mp_po_ovl = mp_po_ovl_constants_sub[0] + lch_unit * mp_po_ovl_constants_sub[1]
             # connect gate to M1 only
             m1_yb, m1_yt = conn_yloc_info['d_y_list'][0]
             via_w, via_h = via_info['dim'][0]
             bot_encx = via_info['bot_enc_le'][0]
             top_encx = (m1_w - via_w) // 2
-            bot_ency = (mp_h - via_h) // 2
+            bot_ency = (mp_h_sub - via_h) // 2
             top_ency = via_info['top_enc_le'][0]
 
             mp_dx = sd_pitch // 2 - lch_unit // 2 + mp_po_ovl
@@ -475,6 +478,8 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
                 template.add_rect('M1', BBox(via_xc - m1_w // 2, m1_yb, via_xc + m1_w // 2, m1_yt, res,
                                              unit_mode=True))
         else:
+            mp_po_ovl = mp_po_ovl_constants[0] + lch_unit * mp_po_ovl_constants[1]
+
             if fg % 2 == 0:
                 gate_fg_list = [2] * (fg // 2)
             else:

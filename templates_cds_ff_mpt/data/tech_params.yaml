@@ -309,7 +309,7 @@ mos:
   # substrate MP vertical space
   mp_spy_sub: 34
   # substrate MP extension/overlap over PO
-  mp_po_ovl_const_sub: [16, 0]
+  mp_po_ovl_constants_sub: [16, 0]
   # substrate MP space to MD
   mp_md_sp_sub: 13
   # substrate MP space to CPO
@@ -319,7 +319,7 @@ mos:
   # vertical space between MP
   mp_spy: 34
   # MP and PO overlap
-  mp_po_ovl_const: [16, 0]
+  mp_po_ovl_constants: [16, 0]
   # space bewteen MP and MD
   mp_md_sp: 13
   # space between MP and CPO
