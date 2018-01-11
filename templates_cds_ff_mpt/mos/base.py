@@ -55,6 +55,9 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         mp_md_sp = mos_constants['mp_md_sp']
         ds_m2_sp = mos_constants['ds_m2_sp']
 
+        md_yb, md_yt = md_y
+        od_yc = (od_y[0] + od_y[1]) // 2
+
         # compute gate/drain connection parameters
         g_conn_info = self.get_conn_drc_info(lch_unit, 'g')
         g_m1_h = g_conn_info[1]['min_len']
@@ -66,13 +69,10 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         g_m3_exty = g_conn_info[3]['top_ext']
 
         d_conn_info = self.get_conn_drc_info(lch_unit, 'd')
-        d_m1_h = d_conn_info[1]['min_len']
+        d_m1_h = max(d_conn_info[1]['min_len'], md_yt - md_yb)
         d_m1_bot_exty = d_conn_info[1]['bot_ext']
         d_m2_h = d_conn_info[2]['w']
         d_m3_h = d_conn_info[3]['min_len']
-
-        md_yb, md_yt = md_y
-        od_yc = (od_y[0] + od_y[1]) // 2
 
         if is_sub:
             # update MP Y coordinates, compute M1 upper and lower bound
@@ -97,7 +97,7 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
                 s_y_list=d_y_list,
             )
         else:
-            d_m1_yb = md_yb
+            d_m1_yb = (md_yb + md_yt - d_m1_h) // 2
             d_m1_yt = d_m1_yb + d_m1_h
             # update gate location
             g_m1_yt = d_m1_yb - g_m1_sple
@@ -187,10 +187,10 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         blk_yt = -(-blk_yt // fin_p) * fin_p
 
         conn_info = self.get_conn_yloc_info(lch_unit, (od_yb, od_yt), (md_yb, md_yt), False)
-        d_m1_yt = conn_info['d_y_list'][0][1]
-        d_m3_yb, d_m3_yt = conn_info['d_y_list'][2]
-        g_m1_yb = conn_info['g_y_list'][0][0]
-        g_m3_yb, g_m3_yt = conn_info['g_y_list'][2]
+        d_m1_yt = conn_info['d_y_list'][1][1]
+        d_m3_yb, d_m3_yt = conn_info['d_y_list'][3]
+        g_m1_yb = conn_info['g_y_list'][1][0]
+        g_m3_yb, g_m3_yt = conn_info['g_y_list'][3]
         return dict(
             blk=(blk_yb, blk_yt),
             od=(od_yb, od_yt),
@@ -282,8 +282,8 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         blk_yb, blk_yt = 0, cpo_top_yc
 
         conn_info = self.get_conn_yloc_info(lch_unit, (od_yb, od_yt), (md_yb, md_yt), True)
-        m1_yb, m1_yt = conn_info['d_y_list'][0]
-        m3_yb, m3_yt = conn_info['d_y_list'][2]
+        m1_yb, m1_yt = conn_info['d_y_list'][1]
+        m3_yb, m3_yt = conn_info['d_y_list'][3]
         return dict(
             blk=(blk_yb, blk_yt),
             od=(od_yb, od_yt),
@@ -403,16 +403,16 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         # figure out via X coordinates
         if is_sub:
             via_x_list = list(range(xc, xc + (fg + 1) * wire_pitch, wire_pitch))
-            conn_y_list = conn_yloc_info['d_y_list']
+            conn_y_list = conn_yloc_info['d_y_list'][1:]
         else:
             if ds_code == 1:
                 via_x_list = list(range(xc, xc + (fg + 1) * wire_pitch, 2 * wire_pitch))
             else:
-                via_x_list = list(range(xc, xc + (fg + 1) * wire_pitch, 2 * wire_pitch))
+                via_x_list = list(range(xc + wire_pitch, xc + (fg + 1) * wire_pitch, 2 * wire_pitch))
             if align_gate:
-                conn_y_list = conn_yloc_info['d_y_list']
+                conn_y_list = conn_yloc_info['d_y_list'][1:]
             else:
-                conn_y_list = conn_yloc_info['s_y_list']
+                conn_y_list = conn_yloc_info['s_y_list'][1:]
 
         # connect from OD up to M3
         stop_layer = dum_layer if is_dum else mos_layer
@@ -453,7 +453,6 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         # type: (...) -> List[WireArray]
 
         is_dum = kwargs.get('is_dum', False)
-
         res = self.res
         mos_lay_table = self.config['mos_layer_table']
         lay_name_table = self.config['layer_name']
@@ -465,7 +464,7 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         via_info = mos_constants['g_via']
 
         conn_yloc_info = self.get_conn_yloc_info(lch_unit, od_y, md_y, is_sub)
-        conn_drc_info = self.get_conn_drc_info(lch_unit, 'd')
+        conn_drc_info = self.get_conn_drc_info(lch_unit, 'g')
 
         conn_warrs = []
 
@@ -475,7 +474,7 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         v0_id = via_id_table[(mos_lay_table['OD'], lay_name_table[1])]
         if is_sub:
             # connect gate to M1 only
-            m1_yb, m1_yt = conn_yloc_info['d_y_list'][0]
+            m1_yb, m1_yt = conn_yloc_info['d_y_list'][1]
             via_w, via_h = via_info['dim'][0]
             bot_encx = via_info['bot_enc_le'][0]
             top_encx = (m1_w - via_w) // 2
@@ -594,7 +593,7 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         dum_layer = self.get_dum_conn_layer()
         for wire_xc in ds_x_list:
             tidx = template.grid.coord_to_track(dum_layer, wire_xc, unit_mode=True)
-            template.add_wires(dum_layer, tidx, m1_yb, m1_yt)
+            template.add_wires(dum_layer, tidx, m1_yb, m1_yt, unit_mode=True)
         xl = ds_x_list[0]
         xr = ds_x_list[-1]
         template.add_rect(m1_lay, BBox(xl, m1_yb, xr, m1_yb + g_m1_dum_h, res, unit_mode=True))

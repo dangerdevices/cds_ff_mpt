@@ -264,7 +264,7 @@ mos:
   # minimum vertical space between OD, in resolution units
   od_spy: 10
   # maximum vertical space between OD, in resolution units
-  od_spy_max: 514
+  od_spy_max: 600
   # OD quantization pitch.
   mos_pitch: 48
   # number of fingers in an AnalogBase row must be multiples of this number.
@@ -392,7 +392,7 @@ mos:
   # gate wire widths
   g_conn_w: [40, 40, 40]
   # drain wire widths
-  d_conn_w: [40, 40, 40]
+  d_conn_w: [40, 72, 40]
   # gate wire directions
   g_conn_dir: ['y', 'x', 'y']
   # drain wire directions
