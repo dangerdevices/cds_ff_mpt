@@ -376,6 +376,8 @@ mos:
   po_od_exty:
     lch: [.inf]
     val: [10]
+  # gate M1 dummy wire height
+  g_m1_dum_h: 40
   # gate wire bottom layer ID
   g_bot_layer: 1
   # drain/source wire bottom layer ID
