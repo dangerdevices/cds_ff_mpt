@@ -110,8 +110,8 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
                 s_y_list=[(d_m1_yb, d_m1_yt), (s_m2_yb, s_m2_yt), (s_m3_yb, s_m3_yt)],
             )
 
-    def get_mos_yloc_info(self, lch_unit, w, fg, **kwargs):
-        # type: (int, int, int, **kwargs) -> Dict[str, Any]
+    def get_mos_yloc_info(self, lch_unit, w, **kwargs):
+        # type: (int, int, **kwargs) -> Dict[str, Any]
 
         mos_constants = self.get_mos_tech_constants(lch_unit)
         fin_h = mos_constants['fin_h']
@@ -192,8 +192,8 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
             d_conn_y=(d_m3_yb, d_m3_yt),
         )
 
-    def get_sub_yloc_info(self, lch_unit, w, fg, **kwargs):
-        # type: (int, int, int, **kwargs) -> Dict[str, Any]
+    def get_sub_yloc_info(self, lch_unit, w, **kwargs):
+        # type: (int, int, **kwargs) -> Dict[str, Any]
         """Get substrate layout information.
 
         Layout is quite simple.  We use M0PO to short adjacent S/D together, so dummies can be
