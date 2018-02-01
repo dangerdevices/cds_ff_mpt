@@ -89,8 +89,8 @@ via_name:
 
 # mapping from tuple of via layers to via ID.
 via_id:
-  !!python/tuple [!!python/tuple ['Poly', 'drawing'], 'M1']: M1_LiPo
-  !!python/tuple [!!python/tuple ['Active', 'drawing'], 'M1']: M1_LiAct
+  !!python/tuple [!!python/tuple ['LiPo', 'drawing'], 'M1']: M1_LiPo
+  !!python/tuple [!!python/tuple ['LiAct', 'drawing'], 'M1']: M1_LiAct
   !!python/tuple ['M1', 'M2']: M2_M1
   !!python/tuple ['M2', 'M3']: M3_M2
   !!python/tuple ['M3', 'M4']: M4_M3
@@ -265,6 +265,10 @@ mos:
   od_spy: 10
   # maximum vertical space between OD, in resolution units
   od_spy_max: 600
+  # Optional: OD vertical extension over fins.
+  # calculated as val[0] + val[1] * fin_h + val[2] * fin_p
+  # defaults to (0, 0, 0)
+  od_fin_exty_constants: !!python/tuple [0, 0, 0]
   # OD quantization pitch.
   mos_pitch: 48
   # number of fingers in an AnalogBase row must be multiples of this number.
@@ -397,6 +401,12 @@ mos:
   po_od_exty:
     lch: [.inf]
     val: [10]
+  # OD horizontal extension over PO.
+  # value specified as a (offset, lch_scale, sd_pitch_scale) tuple, where the extension is
+  # computed as offset + lch_scale * lch_unit + sd_pitch_scale * sd_pitch_unit
+  po_od_extx_constants:
+    lch: [.inf]
+    val: [[0, 0, 1]]
   # gate M1 dummy wire height
   g_m1_dum_h: 40
   # gate wire bottom layer ID
