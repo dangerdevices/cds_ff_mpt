@@ -20,7 +20,7 @@ mos_layer_table:
   # dummy poly on dummy OD
   PO_gate_dummy: !!python/tuple ['Poly', 'dummy']
   # Poly-on-OD-edge layer
-  PODE: !!python/tuple ['Poly', 'edge']
+  PODE: !!null
   # active
   OD: !!python/tuple ['Active', 'drawing']
   # dummy active
@@ -261,8 +261,6 @@ dnw_margins:
 
 # transistor DRC rules.
 mos:
-  # True if PODE is a special poly layer
-  pode_is_poly: True
   # fin height
   fin_h: 14
   # minimum horizontal space between OD, in resolution units

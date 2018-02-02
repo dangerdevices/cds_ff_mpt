@@ -168,6 +168,7 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         g_m3_yb, g_m3_yt = conn_info['g_y_list'][2]
         return dict(
             blk=(blk_yb, blk_yt),
+            po=(blk_yb + cpo_h // 2, blk_yt - cpo_h // 2),
             od=(od_yb, od_yt),
             md=(md_yb, md_yt),
             top_margins=dict(
@@ -253,6 +254,7 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         m3_yb, m3_yt = conn_info['d_y_list'][2]
         return dict(
             blk=(blk_yb, blk_yt),
+            po=(blk_yb + cpo_h // 2, blk_yt - cpo_h // 2),
             od=(od_yb, od_yt),
             md=(md_yb, md_yt),
             top_margins=dict(
