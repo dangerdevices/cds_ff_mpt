@@ -531,7 +531,7 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
 
         return conn_warrs
 
-    def draw_dum_connection_helper(self,  # type: MOSTechCDSFFMPT
+    def draw_dum_connection_helper(self,
                                    template,  # type: TemplateBase
                                    lch_unit,  # type: int
                                    fg,  # type: int
@@ -541,6 +541,9 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
                                    md_y,  # type: Tuple[int, int]
                                    ds_x_list,  # type: List[int]
                                    gate_tracks,  # type: List[Union[float, int]]
+                                   left_edge,  # type: bool
+                                   right_edge,  # type: bool
+                                   options,  # type: Dict[str, Any]
                                    ):
         # type: (...) -> List[WireArray]
 
