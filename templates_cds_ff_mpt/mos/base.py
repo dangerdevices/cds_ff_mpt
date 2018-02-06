@@ -168,6 +168,7 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         g_m3_yb, g_m3_yt = conn_info['g_y_list'][2]
         return dict(
             blk=(blk_yb, blk_yt),
+            po=(blk_yb + cpo_h // 2, blk_yt - cpo_h // 2),
             od=(od_yb, od_yt),
             md=(md_yb, md_yt),
             top_margins=dict(
@@ -253,6 +254,7 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         m3_yb, m3_yt = conn_info['d_y_list'][2]
         return dict(
             blk=(blk_yb, blk_yt),
+            po=(blk_yb + cpo_h // 2, blk_yt - cpo_h // 2),
             od=(od_yb, od_yt),
             md=(md_yb, md_yt),
             top_margins=dict(
@@ -529,7 +531,7 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
 
         return conn_warrs
 
-    def draw_dum_connection_helper(self,  # type: MOSTechCDSFFMPT
+    def draw_dum_connection_helper(self,
                                    template,  # type: TemplateBase
                                    lch_unit,  # type: int
                                    fg,  # type: int
@@ -539,6 +541,9 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
                                    md_y,  # type: Tuple[int, int]
                                    ds_x_list,  # type: List[int]
                                    gate_tracks,  # type: List[Union[float, int]]
+                                   left_edge,  # type: bool
+                                   right_edge,  # type: bool
+                                   options,  # type: Dict[str, Any]
                                    ):
         # type: (...) -> List[WireArray]
 

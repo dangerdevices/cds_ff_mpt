@@ -11,16 +11,20 @@ use_flip_parity: False
 mos_layer_table:
   # poly
   PO: !!python/tuple ['Poly', 'drawing']
-  # dummy poly
+  # substrate poly
+  PO_sub: !!python/tuple ['Poly', 'drawing']
+  # dummy poly on dummy OD
+  PO_gate_dummy: !!python/tuple ['Poly', 'dummy']
+  # dummy poly not on any OD
   PO_dummy: !!python/tuple ['Poly', 'dummy']
   # edge poly
   PO_edge: !!python/tuple ['Poly', 'edge']
+  # edge poly on substrate OD
+  PO_edge_sub: !!python/tuple ['Poly', 'edge']
   # edge poly on dummy OD
   PO_edge_dummy: !!python/tuple ['Poly', 'edge']
-  # dummy poly on dummy OD
-  PO_gate_dummy: !!python/tuple ['Poly', 'dummy']
   # Poly-on-OD-edge layer
-  PODE: !!python/tuple ['Poly', 'edge']
+  PODE: !!null
   # active
   OD: !!python/tuple ['Active', 'drawing']
   # dummy active
@@ -261,8 +265,6 @@ dnw_margins:
 
 # transistor DRC rules.
 mos:
-  # True if PODE is a special poly layer
-  pode_is_poly: True
   # fin height
   fin_h: 14
   # minimum horizontal space between OD, in resolution units
@@ -285,6 +287,8 @@ mos:
   floating_dummy: False
   # True if AnalogMosConn can abut each other.
   abut_analog_mos: True
+  # True if dummies cannot be drawn on substrate region.
+  no_sub_dummy: False
   # channel length used in substrate rings.
   sub_ring_lch: 18.0e-9
   # vertical dummy wires pitch, in routing grid tracks.
@@ -297,6 +301,8 @@ mos:
   dig_conn_layer: 1
   # LaygoBase top layer.
   dig_top_layer: 2
+  # transistor/dummy connections modulus
+  mos_conn_modulus: 1
   # minimum OD density
   od_min_density: 0.20
   # dummy OD height range, in number of fins
@@ -310,6 +316,9 @@ mos:
   imp_od_ency: 45
   # minimum implant layer width
   imp_min_w: 52
+  # dictionary from implant layers to X-delta in outer edge blocks.
+  imp_edge_dx:
+    !!python/tuple [pp, drawing]: [0, 0, 0]
   # overlap between NW layer and DNW layer.
   nw_dnw_ovl: 100
   # extension of NW layer over DNW layer.
