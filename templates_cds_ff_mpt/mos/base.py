@@ -361,7 +361,7 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         bot_layer = mos_constants['d_bot_layer']
         via_info = mos_constants['d_via']
 
-        is_sub = (ds_code == 3)
+        is_sub = (ds_code == 3 or ds_code == 4)
         conn_yloc_info = self.get_conn_yloc_info(lch_unit, od_y, md_y, is_sub)
         conn_drc_info = self.get_conn_drc_info(lch_unit, 'd')
 
