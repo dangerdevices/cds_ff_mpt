@@ -27,6 +27,8 @@ mos_layer_table:
   PODE: !!null
   # active
   OD: !!python/tuple ['Active', 'drawing']
+  # substrate active
+  OD_sub: !!python/tuple ['Active', 'drawing']
   # dummy active
   OD_dummy: !!python/tuple ['Active', 'dummy']
   # gate connection metal
@@ -265,12 +267,16 @@ dnw_margins:
 
 # transistor DRC rules.
 mos:
+  # True if substrate tap is like planar transistors
+  substrate_planar: False
   # fin height
   fin_h: 14
   # minimum horizontal space between OD, in resolution units
   od_spx: 50
   # minimum vertical space between OD, in resolution units
   od_spy: 10
+  # minimum vertical space between real OD and dummy OD, in resolution units
+  od_spy_dum: 10
   # maximum vertical space between OD, in resolution units
   od_spy_max: 600
   # Optional: OD vertical extension over fins.
@@ -403,6 +409,8 @@ mos:
   fg_outer_min:
     lch: [.inf]
     val: [3]
+  # number of fingers in outer edge block when there is a guard ring.
+  fg_outer_gr: 0
   # source/drain pitch related constants.
   # source/drain pitch is computed as val[0] + val[1] * lch_unit
   sd_pitch_constants:
