@@ -398,12 +398,14 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
             cur_yb, cur_yt = conn_y_list[dum_layer - bot_layer]
             for conn_xc in dum_x_list:
                 tidx = template.grid.coord_to_track(dum_layer, conn_xc, unit_mode=True)
-                dum_warrs.append(WireArray(TrackID(dum_layer, tidx), cur_yb * res, cur_yt * res))
+                dum_warrs.append(WireArray(TrackID(dum_layer, tidx), cur_yb, cur_yt, res=res,
+                                           unit_mode=True))
         if stop_layer >= mos_layer:
             cur_yb, cur_yt = conn_y_list[mos_layer - bot_layer]
             for conn_xc in conn_x_list:
                 tidx = template.grid.coord_to_track(mos_layer, conn_xc, unit_mode=True)
-                conn_warrs.append(WireArray(TrackID(mos_layer, tidx), cur_yb * res, cur_yt * res))
+                conn_warrs.append(WireArray(TrackID(mos_layer, tidx), cur_yb, cur_yt, res=res,
+                                            unit_mode=True))
 
         return dum_warrs, conn_warrs
 
@@ -527,7 +529,8 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
                 cur_yb, cur_yt = conn_y_list[-1]
                 for conn_xc in conn_x_list:
                     tidx = template.grid.coord_to_track(mos_layer, conn_xc, unit_mode=True)
-                    conn_warrs.append(WireArray(TrackID(mos_layer, tidx), cur_yb * res, cur_yt * res))
+                    conn_warrs.append(WireArray(TrackID(mos_layer, tidx), cur_yb, cur_yt,
+                                                res=res, unit_mode=True))
 
         return conn_warrs
 
@@ -575,7 +578,8 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
             template.add_rect(m1_lay, BBox(xl, m1_yb, xr, m1_yb + g_m1_dum_h, res, unit_mode=True))
 
         # return gate ports
-        return [WireArray(TrackID(dum_layer, tidx), m1_yb * res, m1_yt * res) for tidx in gate_tracks]
+        return [WireArray(TrackID(dum_layer, tidx), m1_yb, m1_yt, res=res, unit_mode=True)
+                for tidx in gate_tracks]
 
     def draw_decap_connection_helper(self,
                                      template,  # type: TemplateBase
