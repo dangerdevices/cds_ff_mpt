@@ -83,10 +83,10 @@ class TechInfoCDSFFMPT(TechInfoConfig):
                 # spacing rule to square/rectangle vias.
                 raise ValueError('Unsupported via type %s' % via_type)
         elif vname == '2x':
-            if via_type == 'square':
+            # if via_type == 'square':
                 idc = 0.4 * factor
-            else:
-                raise ValueError('Unsupported via type %s' % via_type)
+            # else:
+            #     raise ValueError('yayUnsupported via type %s' % via_type)
         else:
             raise ValueError('Unsupported via name %s and bm_type %s' % (vname, bm_type))
 
