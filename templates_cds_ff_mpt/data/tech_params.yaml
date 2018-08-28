@@ -27,6 +27,8 @@ mos_layer_table:
   PODE: !!null
   # active
   OD: !!python/tuple ['Active', 'drawing']
+  # substrate active
+  OD_sub: !!python/tuple ['Active', 'drawing']
   # dummy active
   OD_dummy: !!python/tuple ['Active', 'dummy']
   # gate connection metal
@@ -344,6 +346,8 @@ mos:
   mp_md_sp: 13
   # space between MP and CPO
   mp_cpo_sp: 19
+  # True to draw CPO
+  has_cpo: True
   # normal CPO height
   cpo_h:
     lch: [.inf]
@@ -423,6 +427,10 @@ mos:
   po_od_extx_constants:
     lch: [.inf]
     val: [[0, 0, 1]]
+  # vertical space between gate PO when no CPO is used
+  po_spy: 0
+  # vertical space between gate PO when no CPO is used for dummy transistors
+  dpo_edge_spy: 0
   # gate M1 dummy wire height
   g_m1_dum_h: 40
   # gate wire bottom layer ID
