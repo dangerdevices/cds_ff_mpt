@@ -7,11 +7,6 @@ resolution: 0.001
 # True if BAG needs to handle coloring metals.
 use_flip_parity: False
 
-well_layers:
-  ntap:
-    - !!python/tuple ['NWell', 'drawing']
-  ptap: []
-
 # mapping from transistor layer name to actual layer/purpose tuple
 mos_layer_table:
   # poly
@@ -273,16 +268,12 @@ dnw_margins:
 
 # transistor DRC rules.
 mos:
-  # True if substrate tap is like planar transistors
-  substrate_planar: False
   # fin height
   fin_h: 14
   # minimum horizontal space between OD, in resolution units
   od_spx: 50
   # minimum vertical space between OD, in resolution units
   od_spy: 10
-  # minimum vertical space between real OD and dummy OD, in resolution units
-  od_spy_dum: 10
   # maximum vertical space between OD, in resolution units
   od_spy_max: 600
   # Optional: OD vertical extension over fins.
@@ -417,8 +408,6 @@ mos:
   fg_outer_min:
     lch: [.inf]
     val: [3]
-  # number of fingers in outer edge block when there is a guard ring.
-  fg_outer_gr: 0
   # source/drain pitch related constants.
   # source/drain pitch is computed as val[0] + val[1] * lch_unit
   sd_pitch_constants:
@@ -439,7 +428,9 @@ mos:
     lch: [.inf]
     val: [[0, 0, 1]]
   # vertical space between gate PO when no CPO is used
-  po_spy: 50
+  po_spy: 0
+  # vertical space between gate PO when no CPO is used for dummy transistors
+  dpo_edge_spy: 0
   # gate M1 dummy wire height
   g_m1_dum_h: 40
   # gate wire bottom layer ID

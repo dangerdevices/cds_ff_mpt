@@ -326,12 +326,10 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
                                        enc1=enc1, enc2=enc2, cut_width=via_w, cut_height=via_h,
                                        unit_mode=True)
             if cur_dir == 'y':
-                template.add_rect(cur_lay_name, BBox(via_xc - cur_w // 2, cur_yb,
-                                                     via_xc + cur_w // 2, cur_yt,
+                template.add_rect(cur_lay_name, BBox(via_xc - cur_w // 2, cur_yb, via_xc + cur_w // 2, cur_yt,
                                                      res, unit_mode=True))
         if cur_dir == 'x':
-            template.add_rect(cur_lay_name, BBox(cur_xl, cur_yb, cur_xr, cur_yt,
-                                                 res, unit_mode=True))
+            template.add_rect(cur_lay_name, BBox(cur_xl, cur_yb, cur_xr, cur_yt, res, unit_mode=True))
 
         # setup next iteration
         return cur_yb, cur_yt, cur_dir, cur_w, cur_lay_name
@@ -363,7 +361,7 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         bot_layer = mos_constants['d_bot_layer']
         via_info = mos_constants['d_via']
 
-        is_sub = (ds_code == 3 or ds_code == 4)
+        is_sub = (ds_code == 3)
         conn_yloc_info = self.get_conn_yloc_info(lch_unit, od_y, md_y, is_sub)
         conn_drc_info = self.get_conn_drc_info(lch_unit, 'd')
 
@@ -379,8 +377,7 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
             if ds_code == 1:
                 via_x_list = list(range(xc, xc + (fg + 1) * wire_pitch, 2 * wire_pitch))
             else:
-                via_x_list = list(range(xc + wire_pitch, xc + (fg + 1) * wire_pitch,
-                                        2 * wire_pitch))
+                via_x_list = list(range(xc + wire_pitch, xc + (fg + 1) * wire_pitch, 2 * wire_pitch))
             if align_gate:
                 conn_y_list = conn_yloc_info['d_y_list']
             else:
@@ -393,22 +390,20 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         for cur_lay, cur_y, via_dim, via_sp, via_ble, via_tle in \
                 zip(lay_list, conn_y_list, via_info['dim'], via_info['sp'],
                     via_info['bot_enc_le'], via_info['top_enc_le']):
-            prev_info = self.up_one_layer(template, cur_lay, cur_y, via_dim, via_sp, via_ble,
-                                          via_tle, via_x_list, prev_info, conn_drc_info)
+            prev_info = self.up_one_layer(template, cur_lay, cur_y, via_dim, via_sp, via_ble, via_tle,
+                                          via_x_list, prev_info, conn_drc_info)
 
         # add WireArrays
         if stop_layer >= dum_layer:
             cur_yb, cur_yt = conn_y_list[dum_layer - bot_layer]
             for conn_xc in dum_x_list:
                 tidx = template.grid.coord_to_track(dum_layer, conn_xc, unit_mode=True)
-                dum_warrs.append(WireArray(TrackID(dum_layer, tidx), cur_yb, cur_yt, res=res,
-                                           unit_mode=True))
+                dum_warrs.append(WireArray(TrackID(dum_layer, tidx), cur_yb * res, cur_yt * res, res))
         if stop_layer >= mos_layer:
             cur_yb, cur_yt = conn_y_list[mos_layer - bot_layer]
             for conn_xc in conn_x_list:
                 tidx = template.grid.coord_to_track(mos_layer, conn_xc, unit_mode=True)
-                conn_warrs.append(WireArray(TrackID(mos_layer, tidx), cur_yb, cur_yt, res=res,
-                                            unit_mode=True))
+                conn_warrs.append(WireArray(TrackID(mos_layer, tidx), cur_yb * res, cur_yt * res, res))
 
         return dum_warrs, conn_warrs
 
@@ -469,8 +464,8 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
                     mp_yc = (mp_yb + mp_yt) // 2
                     template.add_via_primitive(v0_id, [via_xc, mp_yc], enc1=enc1, enc2=enc2,
                                                cut_width=via_w, cut_height=via_h, unit_mode=True)
-                template.add_rect('M1', BBox(via_xc - m1_w // 2, m1_yb, via_xc + m1_w // 2,
-                                             m1_yt, res, unit_mode=True))
+                template.add_rect('M1', BBox(via_xc - m1_w // 2, m1_yb, via_xc + m1_w // 2, m1_yt, res,
+                                             unit_mode=True))
         else:
             mp_po_ovl = mp_po_ovl_constants[0] + lch_unit * mp_po_ovl_constants[1]
 
@@ -523,9 +518,8 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
                 for cur_lay, cur_y, via_dim, via_sp, via_ble, via_tle in \
                         zip(lay_list, conn_y_list, via_info['dim'][1:], via_info['sp'][1:],
                             via_info['bot_enc_le'][1:], via_info['top_enc_le'][1:]):
-                    prev_info = self.up_one_layer(template, cur_lay, cur_y, via_dim, via_sp,
-                                                  via_ble, via_tle, via_x_list, prev_info,
-                                                  conn_drc_info)
+                    prev_info = self.up_one_layer(template, cur_lay, cur_y, via_dim, via_sp, via_ble, via_tle,
+                                                  via_x_list, prev_info, conn_drc_info)
                     via_x_list = conn_x_list
 
                 # add ports
@@ -533,8 +527,7 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
                 cur_yb, cur_yt = conn_y_list[-1]
                 for conn_xc in conn_x_list:
                     tidx = template.grid.coord_to_track(mos_layer, conn_xc, unit_mode=True)
-                    conn_warrs.append(WireArray(TrackID(mos_layer, tidx), cur_yb, cur_yt,
-                                                res=res, unit_mode=True))
+                    conn_warrs.append(WireArray(TrackID(mos_layer, tidx), cur_yb * res, cur_yt * res, res))
 
         return conn_warrs
 
@@ -567,12 +560,9 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         m1_yt = conn_yloc_info['d_y_list'][0][1]
 
         # draw gate/drain/source connection to M1
-        self.draw_g_connection(template, lch_unit, fg, sd_pitch, xc, od_y, md_y, [], is_sub=False,
-                               is_dum=True)
-        self.draw_ds_connection(template, lch_unit, fg, sd_pitch, xc, od_y, md_y, [], [], False, 1,
-                                1, is_dum=True)
-        self.draw_ds_connection(template, lch_unit, fg, sd_pitch, xc, od_y, md_y, [], [], True, 1,
-                                2, is_dum=True)
+        self.draw_g_connection(template, lch_unit, fg, sd_pitch, xc, od_y, md_y, [], is_sub=False, is_dum=True)
+        self.draw_ds_connection(template, lch_unit, fg, sd_pitch, xc, od_y, md_y, [], [], False, 1, 1, is_dum=True)
+        self.draw_ds_connection(template, lch_unit, fg, sd_pitch, xc, od_y, md_y, [], [], True, 1, 2, is_dum=True)
 
         # short M1 together
         dum_layer = self.get_dum_conn_layer()
@@ -585,8 +575,7 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
             template.add_rect(m1_lay, BBox(xl, m1_yb, xr, m1_yb + g_m1_dum_h, res, unit_mode=True))
 
         # return gate ports
-        return [WireArray(TrackID(dum_layer, tidx), m1_yb, m1_yt, res=res, unit_mode=True)
-                for tidx in gate_tracks]
+        return [WireArray(TrackID(dum_layer, tidx), m1_yb * res, m1_yt * res, res) for tidx in gate_tracks]
 
     def draw_decap_connection_helper(self,
                                      template,  # type: TemplateBase
