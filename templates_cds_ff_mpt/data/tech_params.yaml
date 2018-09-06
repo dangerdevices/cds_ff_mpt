@@ -107,6 +107,7 @@ via_id:
   !!python/tuple ['M2', 'M3']: M3_M2
   !!python/tuple ['M3', 'M4']: M4_M3
   !!python/tuple ['M4', 'M5']: M5_M4
+  !!python/tuple ['M5', 'M6']: M6_M5
 
 # table of eletromigration temperature scale factor
 idc_em_scale:
