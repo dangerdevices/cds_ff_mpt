@@ -322,9 +322,8 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         enc1 = [bot_encx, bot_encx, bot_ency, bot_ency]
         enc2 = [top_encx, top_encx, top_ency, top_ency]
         for via_xc in via_x_list:
-            template.add_via_primitive(via_id, [via_xc, via_yc], num_rows=num_rows, sp_rows=via_sp,
-                                       enc1=enc1, enc2=enc2, cut_width=via_w, cut_height=via_h,
-                                       unit_mode=True)
+            template.add_via_primitive(via_id, (via_xc, via_yc), via_w, via_h, num_rows=num_rows,
+                                       sp_rows=via_sp, enc1=enc1, enc2=enc2)
             if cur_dir == 'y':
                 template.add_rect(cur_lay_name, BBox(via_xc - cur_w // 2, cur_yb, via_xc + cur_w // 2, cur_yt,
                                                      res, unit_mode=True))
@@ -462,8 +461,8 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
                 for mp_yb, mp_yt in mp_y_list:
                     template.add_rect(mp_lay, BBox(mp_xl, mp_yb, mp_xr, mp_yt, res, unit_mode=True))
                     mp_yc = (mp_yb + mp_yt) // 2
-                    template.add_via_primitive(v0_id, [via_xc, mp_yc], enc1=enc1, enc2=enc2,
-                                               cut_width=via_w, cut_height=via_h, unit_mode=True)
+                    template.add_via_primitive(v0_id, (via_xc, mp_yc), via_w, via_h, enc1=enc1,
+                                               enc2=enc2)
                 template.add_rect('M1', BBox(via_xc - m1_w // 2, m1_yb, via_xc + m1_w // 2, m1_yt, res,
                                              unit_mode=True))
         else:
@@ -504,8 +503,7 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
                 # draw V0, M1
                 for via_xc in range(via_xoff, via_xoff + (num_fg - 1) * sd_pitch, sd_pitch):
                     cur_tidx = template.grid.coord_to_track(1, via_xc, unit_mode=True)
-                    template.add_via_primitive(v0_id, [via_xc, via_yc], enc1=enc1, enc2=enc2,
-                                               cut_width=via_w, cut_height=via_h, unit_mode=True)
+                    template.add_via_primitive(v0_id, (via_xc, via_yc), enc1=enc1, enc2=enc2)
                     template.add_wires(1, cur_tidx, m1_yb, m1_yt, unit_mode=True)
                     via_x_list.append(via_xc)
                 tot_fg += num_fg
