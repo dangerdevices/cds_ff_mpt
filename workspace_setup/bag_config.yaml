@@ -13,7 +13,7 @@ socket:
 # Right now only virtuoso is supported.
 database:
   # the python class that handles database interaction.
-  class: "bag.interface.skill.SkillInterface"
+  class: "bag.interface.oa.OAInterface"
   # default directory to create generated libraries in.
   default_lib_path: "${BAG_WORK_DIR}/gen_libs"
   # configurations for schematic import and generation

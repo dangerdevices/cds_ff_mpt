@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, List, Tuple, Optional, Callable
 from bag.layout.tech import TechInfoConfig
 
 from . import config as _config
+from . import config_fname as _config_fname
 from .mos.base import MOSTechCDSFFMPT
 
 if TYPE_CHECKING:
@@ -13,7 +14,7 @@ if TYPE_CHECKING:
 
 class TechInfoCDSFFMPT(TechInfoConfig):
     def __init__(self, process_params):
-        TechInfoConfig.__init__(self, _config, process_params)
+        TechInfoConfig.__init__(self, _config_fname, _config, process_params)
 
         process_params['layout']['mos_tech_class'] = MOSTechCDSFFMPT(_config, self)
         process_params['layout']['laygo_tech_class'] = None

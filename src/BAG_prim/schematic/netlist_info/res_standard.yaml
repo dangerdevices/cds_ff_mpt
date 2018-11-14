@@ -1,36 +1,266 @@
 lib_name: BAG_prim
 cell_name: res_standard
-pins: [ "PLUS", "MINUS", "BULK" ]
+view_name: schematic
+bbox:
+  - -302
+  - -306
+  - -10
+  - -130
+terminals:
+  BULK:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: iopin
+          view_name: symbolr
+          xform:
+            - -70
+            - -210
+            - 0
+          bbox:
+            - -131
+            - -236
+            - -60
+            - -200
+          connections:
+            {}
+          params:
+            {}
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -95
+            - -210
+          alignment: 7
+          orient: 0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 0
+    ttype: 2
+  MINUS:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: iopin
+          view_name: symbolr
+          xform:
+            - -200
+            - -280
+            - 0
+          bbox:
+            - -261
+            - -306
+            - -190
+            - -270
+          connections:
+            {}
+          params:
+            {}
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -225
+            - -280
+          alignment: 7
+          orient: 0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 0
+    ttype: 2
+  PLUS:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: iopin
+          view_name: symbolr
+          xform:
+            - -200
+            - -140
+            - 0
+          bbox:
+            - -261
+            - -166
+            - -190
+            - -130
+          connections:
+            {}
+          params:
+            {}
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -225
+            - -140
+          alignment: 7
+          orient: 0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 0
+    ttype: 2
+shapes:
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: MINUS
+      points:
+        -
+          - -200
+          - -280
+        -
+          - -180
+          - -280
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: MINUS
+      points:
+        -
+          - -180
+          - -280
+        -
+          - -180
+          - -240
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: PLUS
+      points:
+        -
+          - -210
+          - -140
+        -
+          - -180
+          - -140
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: PLUS
+      points:
+        -
+          - -180
+          - -180
+        -
+          - -180
+          - -140
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: BULK
+      points:
+        -
+          - -75
+          - -210
+        -
+          - -60
+          - -210
 instances:
-  PIN2:
-    lib_name: basic
-    cell_name: iopin
-    instpins: {}
-  PIN1:
-    lib_name: basic
-    cell_name: iopin
-    instpins: {}
-  PIN0:
-    lib_name: basic
-    cell_name: iopin
-    instpins: {}
   I0:
     lib_name: basic
     cell_name: noConn
-    instpins:
-      noConn:
-        direction: inputOutput
-        net_name: "BULK"
-        num_bits: 1
+    view_name: symbol
+    xform:
+      - -60
+      - -210
+      - 6
+    bbox:
+      - -64
+      - -220
+      - -10
+      - -200
+    connections:
+      noConn: BULK
+    params:
+      {}
   R0:
     lib_name: cds_ff_mpt
     cell_name: rspp
-    instpins:
-      MINUS:
-        direction: inputOutput
-        net_name: "MINUS"
-        num_bits: 1
-      PLUS:
-        direction: inputOutput
-        net_name: "PLUS"
-        num_bits: 1
+    view_name: symbol
+    xform:
+      - -180
+      - -180
+      - 0
+    bbox:
+      - -302
+      - -253
+      - -81
+      - -165
+    connections:
+      MINUS: MINUS
+      PLUS: PLUS
+    params:
+      effl:
+        - 3
+        - 150.0n
+      effw:
+        - 3
+        - 18.0n
+      l:
+        - 3
+        - pPar("l")
+      w:
+        - 3
+        - pPar("w")
+props:
+  connectivityLastUpdated:
+    - 0
+    - 709
+  instance#:
+    - 0
+    - 1
+  lastSchematicExtraction:
+    - 4
+    - time_val: 1495815677
+  net#:
+    - 0
+    - 3
+  pin#:
+    - 0
+    - 3
+  schGeometryLastUpdated:
+    - 0
+    - 709
+  schGeometryVersion:
+    - 3
+    - sch.ds.gm.1.4
+  schXtrVersion:
+    - 3
+    - sch.10.0
+app_defs:
+  _dbLastSavedCounter:
+    - 0
+    - 709
+  _dbvCvTimeStamp:
+    - 0
+    - 709
+  cdbRevision:
+    - 0
+    - 227612

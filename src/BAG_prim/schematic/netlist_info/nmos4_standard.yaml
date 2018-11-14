@@ -1,11 +1,12 @@
 lib_name: BAG_prim
 cell_name: nmos4_standard
 view_name: schematic
-in_terms:
-  {}
-out_terms:
-  {}
-io_terms:
+bbox:
+  - -201
+  - -106
+  - 30
+  - 100
+terminals:
   B:
     obj:
       - 1
@@ -17,6 +18,11 @@ io_terms:
             - 20
             - 0
             - 0
+          bbox:
+            - -41
+            - -26
+            - 30
+            - 10
           connections:
             {}
           params:
@@ -37,7 +43,8 @@ io_terms:
           drafting: true
           attr_type: 0
           format: 1
-    sig_type: 0
+    stype: 0
+    ttype: 2
   D:
     obj:
       - 1
@@ -49,6 +56,11 @@ io_terms:
             - -80
             - 90
             - 0
+          bbox:
+            - -141
+            - 64
+            - -70
+            - 100
           connections:
             {}
           params:
@@ -69,7 +81,8 @@ io_terms:
           drafting: true
           attr_type: 0
           format: 1
-    sig_type: 0
+    stype: 0
+    ttype: 2
   G:
     obj:
       - 1
@@ -81,6 +94,11 @@ io_terms:
             - -140
             - 0
             - 0
+          bbox:
+            - -201
+            - -26
+            - -130
+            - 10
           connections:
             {}
           params:
@@ -101,7 +119,8 @@ io_terms:
           drafting: true
           attr_type: 0
           format: 1
-    sig_type: 0
+    stype: 0
+    ttype: 2
   S:
     obj:
       - 1
@@ -113,6 +132,11 @@ io_terms:
             - -80
             - -80
             - 0
+          bbox:
+            - -141
+            - -106
+            - -70
+            - -70
           connections:
             {}
           params:
@@ -133,7 +157,8 @@ io_terms:
           drafting: true
           attr_type: 0
           format: 1
-    sig_type: 0
+    stype: 0
+    ttype: 2
 shapes:
   -
     - 5
@@ -141,84 +166,72 @@ shapes:
       purpose: 4294967295
       net: S
       points:
-        size: 2
-        points:
-          -
-            - -80
-            - -80
-          -
-            - -60
-            - -80
+        -
+          - -80
+          - -80
+        -
+          - -60
+          - -80
   -
     - 5
     - layer: 228
       purpose: 4294967295
       net: S
       points:
-        size: 2
-        points:
-          -
-            - -60
-            - -80
-          -
-            - -60
-            - -30
+        -
+          - -60
+          - -80
+        -
+          - -60
+          - -30
   -
     - 5
     - layer: 228
       purpose: 4294967295
       net: G
       points:
-        size: 2
-        points:
-          -
-            - -140
-            - 0
-          -
-            - -100
-            - 0
+        -
+          - -140
+          - 0
+        -
+          - -100
+          - 0
   -
     - 5
     - layer: 228
       purpose: 4294967295
       net: B
       points:
-        size: 2
-        points:
-          -
-            - -60
-            - 0
-          -
-            - 10
-            - 0
+        -
+          - -60
+          - 0
+        -
+          - 10
+          - 0
   -
     - 5
     - layer: 228
       purpose: 4294967295
       net: D
       points:
-        size: 2
-        points:
-          -
-            - -80
-            - 90
-          -
-            - -60
-            - 90
+        -
+          - -80
+          - 90
+        -
+          - -60
+          - 90
   -
     - 5
     - layer: 228
       purpose: 4294967295
       net: D
       points:
-        size: 2
-        points:
-          -
-            - -60
-            - 30
-          -
-            - -60
-            - 90
+        -
+          - -60
+          - 30
+        -
+          - -60
+          - 90
 instances:
   M0:
     lib_name: cds_ff_mpt
@@ -228,6 +241,11 @@ instances:
       - -100
       - 0
       - 0
+    bbox:
+      - -168
+      - -58
+      - 28
+      - 45
     connections:
       B: B
       D: D

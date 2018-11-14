@@ -21,6 +21,9 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
         # type: (Dict[str, Any], TechInfoConfig) -> None
         MOSTechFinfetBase.__init__(self, config, tech_info)
 
+    def is_planar_substrate(self, lch_unit, **kwargs):
+        return False
+
     def get_conn_yloc_info(self, lch_unit, od_y, md_y, is_sub):
         # type: (int, Tuple[int, int], Tuple[int, int], bool) -> Dict[str, Any]
 

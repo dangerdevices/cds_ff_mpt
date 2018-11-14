@@ -1,40 +1,319 @@
 lib_name: BAG_prim
 cell_name: nmos4_hvt
-pins: [ "G", "D", "S", "B" ]
+view_name: schematic
+bbox:
+  - -201
+  - -106
+  - 30
+  - 100
+terminals:
+  B:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: iopin
+          view_name: symbolr
+          xform:
+            - 20
+            - 0
+            - 0
+          bbox:
+            - -41
+            - -26
+            - 30
+            - 10
+          connections:
+            {}
+          params:
+            {}
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -5
+            - 0
+          alignment: 7
+          orient: 0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 0
+    ttype: 2
+  D:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: iopin
+          view_name: symbolr
+          xform:
+            - -80
+            - 90
+            - 0
+          bbox:
+            - -141
+            - 64
+            - -70
+            - 100
+          connections:
+            {}
+          params:
+            {}
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -105
+            - 90
+          alignment: 7
+          orient: 0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 0
+    ttype: 2
+  G:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: iopin
+          view_name: symbolr
+          xform:
+            - -140
+            - 0
+            - 0
+          bbox:
+            - -201
+            - -26
+            - -130
+            - 10
+          connections:
+            {}
+          params:
+            {}
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -165
+            - 0
+          alignment: 7
+          orient: 0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 0
+    ttype: 2
+  S:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: iopin
+          view_name: symbolr
+          xform:
+            - -80
+            - -80
+            - 0
+          bbox:
+            - -141
+            - -106
+            - -70
+            - -70
+          connections:
+            {}
+          params:
+            {}
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -105
+            - -80
+          alignment: 7
+          orient: 0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 0
+    ttype: 2
+shapes:
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: S
+      points:
+        -
+          - -80
+          - -80
+        -
+          - -60
+          - -80
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: S
+      points:
+        -
+          - -60
+          - -80
+        -
+          - -60
+          - -30
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: G
+      points:
+        -
+          - -140
+          - 0
+        -
+          - -100
+          - 0
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: B
+      points:
+        -
+          - -60
+          - 0
+        -
+          - 10
+          - 0
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: D
+      points:
+        -
+          - -80
+          - 90
+        -
+          - -60
+          - 90
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: D
+      points:
+        -
+          - -60
+          - 30
+        -
+          - -60
+          - 90
 instances:
-  PIN3:
-    lib_name: basic
-    cell_name: iopin
-    instpins: {}
-  PIN2:
-    lib_name: basic
-    cell_name: iopin
-    instpins: {}
-  PIN1:
-    lib_name: basic
-    cell_name: iopin
-    instpins: {}
-  PIN0:
-    lib_name: basic
-    cell_name: iopin
-    instpins: {}
   M0:
     lib_name: cds_ff_mpt
     cell_name: n1hvt
-    instpins:
-      D:
-        direction: inputOutput
-        net_name: "D"
-        num_bits: 1
-      B:
-        direction: inputOutput
-        net_name: "B"
-        num_bits: 1
-      G:
-        direction: inputOutput
-        net_name: "G"
-        num_bits: 1
-      S:
-        direction: inputOutput
-        net_name: "S"
-        num_bits: 1
+    view_name: symbol
+    xform:
+      - -100
+      - 0
+      - 0
+    bbox:
+      - -168
+      - -58
+      - 28
+      - 45
+    connections:
+      B: B
+      D: D
+      G: G
+      S: S
+    params:
+      adej:
+        - 3
+        - 1.3056e-14
+      asej:
+        - 3
+        - 2.6112e-14
+      dmypolyw:
+        - 3
+        - 18.0n
+      ecpolyw:
+        - 3
+        - 18.0n
+      fw:
+        - 3
+        - 158.00n
+      l:
+        - 3
+        - pPar("l")
+      lrsd:
+        - 3
+        - 68.0n
+      nf:
+        - 3
+        - pPar("nf")
+      nfin:
+        - 3
+        - pPar("w")
+      pdej:
+        - 3
+        - 3.28e-07
+      psej:
+        - 3
+        - 6.56e-07
+props:
+  connectivityLastUpdated:
+    - 0
+    - 3588
+  lastSchematicExtraction:
+    - 4
+    - time_val: 1502521051
+  net#:
+    - 0
+    - 4
+  pin#:
+    - 0
+    - 4
+  schGeometryLastUpdated:
+    - 0
+    - 3588
+  schGeometryVersion:
+    - 3
+    - sch.ds.gm.1.4
+  schXtrVersion:
+    - 3
+    - sch.10.0
+app_defs:
+  _dbLastSavedCounter:
+    - 0
+    - 3588
+  _dbvCvTimeStamp:
+    - 0
+    - 3588
+  cdbRevision:
+    - 0
+    - 227612
