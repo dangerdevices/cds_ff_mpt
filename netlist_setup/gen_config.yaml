@@ -1,0 +1,32 @@
+header:
+  CDL:
+    includes: []
+  VERILOG:
+    includes: []
+
+mos:
+  CDL:
+    l_str: l
+    w_str: nfin
+    nf_str: nf
+    other: 'm=1'
+  VERILOG:
+    l_str: l
+    w_str: nfin
+    nf_str: mult
+    other: ''
+  types:
+    - [nmos4_18, n2svt]
+    - [nmos4_svt, n1svt]
+    - [nmos4_lvt, n1lvt]
+    - [nmos4_hvt, n1hvt]
+    - [nmos4_standard, n1svt]
+    - [nmos4_fast, n1lvt]
+    - [nmos4_low_power, n1hvt]
+    - [pmos4_18, p2svt]
+    - [pmos4_svt, p1svt]
+    - [pmos4_lvt, p1lvt]
+    - [pmos4_hvt, p1hvt]
+    - [pmos4_standard, p1svt]
+    - [pmos4_fast, p1lvt]
+    - [pmos4_low_power, p1hvt]

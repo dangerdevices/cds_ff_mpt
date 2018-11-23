@@ -1,0 +1,70 @@
+
+.SUBCKT nmos4_18 B D G S
+*.PININFO B:B D:B G:B S:B
+MM0 D G S B n2svt l=l nfin=w nf=nf m=1
+.ENDS
+
+.SUBCKT nmos4_svt B D G S
+*.PININFO B:B D:B G:B S:B
+MM0 D G S B n1svt l=l nfin=w nf=nf m=1
+.ENDS
+
+.SUBCKT nmos4_lvt B D G S
+*.PININFO B:B D:B G:B S:B
+MM0 D G S B n1lvt l=l nfin=w nf=nf m=1
+.ENDS
+
+.SUBCKT nmos4_hvt B D G S
+*.PININFO B:B D:B G:B S:B
+MM0 D G S B n1hvt l=l nfin=w nf=nf m=1
+.ENDS
+
+.SUBCKT nmos4_standard B D G S
+*.PININFO B:B D:B G:B S:B
+MM0 D G S B n1svt l=l nfin=w nf=nf m=1
+.ENDS
+
+.SUBCKT nmos4_fast B D G S
+*.PININFO B:B D:B G:B S:B
+MM0 D G S B n1lvt l=l nfin=w nf=nf m=1
+.ENDS
+
+.SUBCKT nmos4_low_power B D G S
+*.PININFO B:B D:B G:B S:B
+MM0 D G S B n1hvt l=l nfin=w nf=nf m=1
+.ENDS
+
+.SUBCKT pmos4_18 B D G S
+*.PININFO B:B D:B G:B S:B
+MM0 D G S B p2svt l=l nfin=w nf=nf m=1
+.ENDS
+
+.SUBCKT pmos4_svt B D G S
+*.PININFO B:B D:B G:B S:B
+MM0 D G S B p1svt l=l nfin=w nf=nf m=1
+.ENDS
+
+.SUBCKT pmos4_lvt B D G S
+*.PININFO B:B D:B G:B S:B
+MM0 D G S B p1lvt l=l nfin=w nf=nf m=1
+.ENDS
+
+.SUBCKT pmos4_hvt B D G S
+*.PININFO B:B D:B G:B S:B
+MM0 D G S B p1hvt l=l nfin=w nf=nf m=1
+.ENDS
+
+.SUBCKT pmos4_standard B D G S
+*.PININFO B:B D:B G:B S:B
+MM0 D G S B p1svt l=l nfin=w nf=nf m=1
+.ENDS
+
+.SUBCKT pmos4_fast B D G S
+*.PININFO B:B D:B G:B S:B
+MM0 D G S B p1lvt l=l nfin=w nf=nf m=1
+.ENDS
+
+.SUBCKT pmos4_low_power B D G S
+*.PININFO B:B D:B G:B S:B
+MM0 D G S B p1hvt l=l nfin=w nf=nf m=1
+.ENDS

@@ -1,0 +1,145 @@
+inc_list:
+  4: [cds_ff_mpt/netlist_setup/bag_prim.cdl]
+  5: [cds_ff_mpt/netlist_setup/bag_prim.v]
+netlist_map:
+  BAG_prim:
+    nmos4_18:
+      cell_name: nmos4_18
+      in_terms: []
+      io_terms: [B, D, G, S]
+      is_prim: true
+      out_terms: []
+      props:
+        l: [3, '']
+        nf: [3, '']
+        w: [3, '']
+    nmos4_fast:
+      cell_name: nmos4_fast
+      in_terms: []
+      io_terms: [B, D, G, S]
+      is_prim: true
+      out_terms: []
+      props:
+        l: [3, '']
+        nf: [3, '']
+        w: [3, '']
+    nmos4_hvt:
+      cell_name: nmos4_hvt
+      in_terms: []
+      io_terms: [B, D, G, S]
+      is_prim: true
+      out_terms: []
+      props:
+        l: [3, '']
+        nf: [3, '']
+        w: [3, '']
+    nmos4_low_power:
+      cell_name: nmos4_low_power
+      in_terms: []
+      io_terms: [B, D, G, S]
+      is_prim: true
+      out_terms: []
+      props:
+        l: [3, '']
+        nf: [3, '']
+        w: [3, '']
+    nmos4_lvt:
+      cell_name: nmos4_lvt
+      in_terms: []
+      io_terms: [B, D, G, S]
+      is_prim: true
+      out_terms: []
+      props:
+        l: [3, '']
+        nf: [3, '']
+        w: [3, '']
+    nmos4_standard:
+      cell_name: nmos4_standard
+      in_terms: []
+      io_terms: [B, D, G, S]
+      is_prim: true
+      out_terms: []
+      props:
+        l: [3, '']
+        nf: [3, '']
+        w: [3, '']
+    nmos4_svt:
+      cell_name: nmos4_svt
+      in_terms: []
+      io_terms: [B, D, G, S]
+      is_prim: true
+      out_terms: []
+      props:
+        l: [3, '']
+        nf: [3, '']
+        w: [3, '']
+    pmos4_18:
+      cell_name: pmos4_18
+      in_terms: []
+      io_terms: [B, D, G, S]
+      is_prim: true
+      out_terms: []
+      props:
+        l: [3, '']
+        nf: [3, '']
+        w: [3, '']
+    pmos4_fast:
+      cell_name: pmos4_fast
+      in_terms: []
+      io_terms: [B, D, G, S]
+      is_prim: true
+      out_terms: []
+      props:
+        l: [3, '']
+        nf: [3, '']
+        w: [3, '']
+    pmos4_hvt:
+      cell_name: pmos4_hvt
+      in_terms: []
+      io_terms: [B, D, G, S]
+      is_prim: true
+      out_terms: []
+      props:
+        l: [3, '']
+        nf: [3, '']
+        w: [3, '']
+    pmos4_low_power:
+      cell_name: pmos4_low_power
+      in_terms: []
+      io_terms: [B, D, G, S]
+      is_prim: true
+      out_terms: []
+      props:
+        l: [3, '']
+        nf: [3, '']
+        w: [3, '']
+    pmos4_lvt:
+      cell_name: pmos4_lvt
+      in_terms: []
+      io_terms: [B, D, G, S]
+      is_prim: true
+      out_terms: []
+      props:
+        l: [3, '']
+        nf: [3, '']
+        w: [3, '']
+    pmos4_standard:
+      cell_name: pmos4_standard
+      in_terms: []
+      io_terms: [B, D, G, S]
+      is_prim: true
+      out_terms: []
+      props:
+        l: [3, '']
+        nf: [3, '']
+        w: [3, '']
+    pmos4_svt:
+      cell_name: pmos4_svt
+      in_terms: []
+      io_terms: [B, D, G, S]
+      is_prim: true
+      out_terms: []
+      props:
+        l: [3, '']
+        nf: [3, '']
+        w: [3, '']
