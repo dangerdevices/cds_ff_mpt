@@ -1,6 +1,7 @@
 inc_list:
   4: [cds_ff_mpt/netlist_setup/bag_prim.cdl]
   5: [cds_ff_mpt/netlist_setup/bag_prim.v]
+  6: []
 netlist_map:
   BAG_prim:
     nmos4_18:

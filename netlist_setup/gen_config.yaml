@@ -3,6 +3,8 @@ header:
     includes: []
   VERILOG:
     includes: []
+  SYSVERILOG:
+    includes: []
 
 mos:
   CDL:
@@ -11,6 +13,11 @@ mos:
     nf_str: nf
     other: 'm=1'
   VERILOG:
+    l_str: l
+    w_str: nfin
+    nf_str: mult
+    other: ''
+  SYSVERILOG:
     l_str: l
     w_str: nfin
     nf_str: mult
