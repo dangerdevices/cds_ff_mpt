@@ -1,6 +1,6 @@
 inc_list:
-  4: [cds_ff_mpt/netlist_setup/bag_prim.cdl]
-  5: [cds_ff_mpt/netlist_setup/bag_prim.v]
+  4: []
+  5: []
   6: []
 netlist_map:
   BAG_prim:
@@ -144,3 +144,5 @@ netlist_map:
         l: [3, '']
         nf: [3, '']
         w: [3, '']
+prim_files: {4: cds_ff_mpt/netlist_setup/bag_prim.cdl, 5: cds_ff_mpt/netlist_setup/bag_prim.v,
+  6: ''}
