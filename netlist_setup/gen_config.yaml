@@ -8,20 +8,20 @@ header:
 
 mos:
   CDL:
-    l_str: l
-    w_str: nfin
-    nf_str: nf
-    other: 'm=1'
+    - [l, l]
+    - [nfin, w]
+    - [nf, nf]
+    - [m, '1']
   VERILOG:
-    l_str: l
-    w_str: nfin
-    nf_str: mult
-    other: ''
+    - [l, l]
+    - [nfin, w]
+    - [nf, nf]
+    - [m, '1']
   SYSVERILOG:
-    l_str: l
-    w_str: nfin
-    nf_str: mult
-    other: ''
+    - [l, l]
+    - [nfin, w]
+    - [nf, nf]
+    - [m, '1']
   types:
     - [nmos4_18, n2svt]
     - [nmos4_svt, n1svt]
