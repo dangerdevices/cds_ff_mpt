@@ -1,5 +1,18 @@
-.idea
-*.pyc
+# Misc files
 *~
-*cdslck*
+
+# Python files
+*.pyc
+__pycache__
+
+# Virtuoso files
+*.cdslck
+*.cdslck.*
+
+# Pycharm related files
+.idea/workspace.xml
+.idea/usage.statistics.xml
+.idea/tasks.xml
+
+# Jupyter files
 .ipynb_checkpoints
