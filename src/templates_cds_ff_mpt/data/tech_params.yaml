@@ -80,13 +80,13 @@ metal_exclude_table:
   2: !!python/tuple ['DMEXCL', 'dummy2']
 
 # mapping from metal layer ID to metal layer name.  Assume purpose is 'drawing'.
-layer_name:
-  1: M1
-  2: M2
-  3: M3
-  4: M4
-  5: M5
-  6: M6
+lay_purp_list:
+  1: [!!python/tuple ['M1', '']]
+  2: [!!python/tuple ['M2', '']]
+  3: [!!python/tuple ['M3', '']]
+  4: [!!python/tuple ['M4', '']]
+  5: [!!python/tuple ['M5', '']]
+  6: [!!python/tuple ['M6', '']]
 
 # mapping from metal layer name to metal layer type.  The layer type
 # is used to figure out which EM rules to use.
