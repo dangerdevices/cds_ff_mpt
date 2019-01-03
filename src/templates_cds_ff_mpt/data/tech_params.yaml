@@ -81,44 +81,22 @@ metal_exclude_table:
 
 # mapping from metal layer ID to metal layer name.  Assume purpose is 'drawing'.
 lay_purp_list:
-  1: [!!python/tuple ['M1', '']]
-  2: [!!python/tuple ['M2', '']]
-  3: [!!python/tuple ['M3', '']]
-  4: [!!python/tuple ['M4', '']]
-  5: [!!python/tuple ['M5', '']]
-  6: [!!python/tuple ['M6', '']]
-
-# mapping from metal layer name to metal layer type.  The layer type
-# is used to figure out which EM rules to use.
-layer_type:
-  LiPo: LiPo
-  LiAct: LiAct
-  M1: 1x
-  M2: 1x
-  M3: 1x
-  M4: '4'
-  M5: 2x
-  M6: 2x
-
-# mapping from via bottom layer ID to via name.  Via name is used
-# to figure out enclosure rules.
-via_name:
-  0: 1x
-  1: 1x
-  2: 1x
-  3: '4'
-  4: 2x
-  5: 2x
+  1: [['M1', '']]
+  2: [['M2', '']]
+  3: [['M3', '']]
+  4: [['M4', '']]
+  5: [['M5', '']]
+  6: [['M6', '']]
 
 # mapping from tuple of via layers to via ID.
 via_id:
-  !!python/tuple [!!python/tuple ['LiPo', 'drawing'], 'M1']: M1_LiPo
-  !!python/tuple [!!python/tuple ['LiAct', 'drawing'], 'M1']: M1_LiAct
-  !!python/tuple ['M1', 'M2']: M2_M1
-  !!python/tuple ['M2', 'M3']: M3_M2
-  !!python/tuple ['M3', 'M4']: M4_M3
-  !!python/tuple ['M4', 'M5']: M5_M4
-  !!python/tuple ['M5', 'M6']: M6_M5
+  [!!python/tuple ['LiPo', 'drawing'], !!python/tuple ['M1', 'drawing']]: M1_LiPo
+  [!!python/tuple ['LiAct', 'drawing'], !!python/tuple ['M1', 'drawing']]: M1_LiAct
+  [!!python/tuple ['M1', 'drawing'], !!python/tuple ['M2', 'drawing']]: M2_M1
+  [!!python/tuple ['M2', 'drawing'], !!python/tuple ['M3', 'drawing']]: M3_M2
+  [!!python/tuple ['M3', 'drawing'], !!python/tuple ['M4', 'drawing']]: M4_M3
+  [!!python/tuple ['M4', 'drawing'], !!python/tuple ['M5', 'drawing']]: M5_M4
+  [!!python/tuple ['M5', 'drawing'], !!python/tuple ['M6', 'drawing']]: M6_M5
 
 # table of eletromigration temperature scale factor
 idc_em_scale:
@@ -138,139 +116,102 @@ idc_em_scale:
 
 # via enclosure/spacing rules
 via:
-  1x:
-    square:
+  M2_M1: &via_1x
+    - name: square
       dim: [32, 32]
       sp: [42, 42]
-      sp2: [!!python/tuple [42, 42]]
-      sp3: [!!python/tuple [42, 42]]
-      bot_enc:
-      top_enc:
-        w_list: [35, 51, 67, .inf]
-        enc_list:
-          - [[40, 0], [0, 40]]
-          - [[2, 34], [34, 2]]
-          - [[28, 10], [10, 28]]
-          - [[18, 18]]
-    hrect:
+      sp2: [[42, 42]]
+      sp3: [[42, 42]]
+      bot_enc: &square_1x_enc
+        - [35, [[40, 0], [0, 40]]]
+        - [51, [[2, 34], [34, 2]]]
+        - [67, [[28, 10], [10, 28]]]
+        - [.inf, [[18, 18]]]
+      top_enc: *square_1x_enc
+    - &hrect_1x
+      name: hrect
       dim: [64, 32]
       sp: [42, 42]
-      sp2: [!!python/tuple [42, 42]]
-      sp3: [!!python/tuple [42, 42]]
-      bot_enc:
-      top_enc:
-        w_list: [49, 51, 105, .inf]
-        enc_list:
-          - [[20, 0]]
-          - [[12, 9]]
-          - [[10, 10]]
-          - [[10, 0]]
-  '4':
-    square:
-      dim: [32, 32]
+      sp2: [[42, 42]]
+      sp3: [[42, 42]]
+      bot_enc: &hrect_1x_enc
+        - [49, [[20, 0]]]
+        - [51, [[12, 9]]]
+        - [105, [[10, 10]]]
+        - [.inf, [[10, 0]]]
+      top_enc: *hrect_1x_enc
+    - &vrect_1x
+      name: vrect
+      dim: [32, 64]
       sp: [42, 42]
-      sp2: [!!python/tuple [42, 42]]
-      sp3: [!!python/tuple [42, 42]]
-      bot_enc:
-      top_enc:
-        w_list: [35, 51, 67, .inf]
-        enc_list:
-          - [[40, 0], [0, 40]]
-          - [[2, 34], [34, 2]]
-          - [[28, 10], [10, 28]]
-          - [[18, 18]]
-    hrect:
-      dim: [64, 32]
-      sp: [42, 42]
-      sp2: [!!python/tuple [42, 42]]
-      sp3: [!!python/tuple [42, 42]]
-      bot_enc:
-      top_enc:
-        w_list: [49, 51, 105, .inf]
-        enc_list:
-          # list of valid horizontal/vertical enclosures.
-          - [[20, 0]]
-          - [[12, 9]]
-          - [[10, 10]]
-          - [[10, 0]]
-  2x:
-    square:
+      sp2: [[42, 42]]
+      sp3: [[42, 42]]
+      bot_enc: &vrect_1x_enc
+        - [49, [[0, 20]]]
+        - [51, [[9, 12]]]
+        - [105, [[10, 10]]]
+        - [.inf, [[0, 10]]]
+      top_enc: *vrect_1x_enc
+  M3_M2: *via_1x
+  M4_M3: *via_1x
+  M5_M4: &via_2x
+    - name: square
       dim: [42, 42]
       sp: [62, 62]
-      sp2: [!!python/tuple [62, 62]]
-      sp3: [!!python/tuple [78, 78]]
-      bot_enc:
-      top_enc:
-        w_list: [.inf]
-        enc_list:
-          - [[8, 8]]
-    hrect:
-      dim: [64, 32]
-      sp: [42, 42]
-      sp2: [!!python/tuple [42, 42]]
-      sp3: [!!python/tuple [42, 42]]
-      bot_enc:
-      top_enc:
-        w_list: [49, 51, 105, .inf]
-        enc_list:
-          - [[20, 0]]
-          - [[12, 9]]
-          - [[10, 10]]
-          - [[10, 0]]
+      sp2: [[62, 62]]
+      sp3: [[78, 78]]
+      bot_enc: &square_2x_enc
+        - [.inf, [[8, 8]]]
+      top_enc: *square_2x_enc
+    - *hrect_1x
+    - *vrect_1x
+  M6_M5: *via_2x
 
 # minimum wire spacing rule.  Space is measured orthogonal to wire direction.
-sp_min:
-  1x:
-    w_list: [.inf]
-    sp_list: [32]
-  '4':
-    w_list: [99, 749, 1499, .inf]
-    sp_list: [48, 72, 112, 220]
-  2x:
-    w_list: [59, 89, .inf]
-    sp_list: [68, 80, 100]
+sp_min: &sp_min_data
+  [M1, drawing]: &sp_min_1x
+    - [.inf, 32]
+  [M2, drawing]: *sp_min_1x
+  [M3, drawing]: *sp_min_1x
+  [M4, drawing]:
+    - [99, 48]
+    - [749, 72]
+    - [1499, 112]
+    - [.inf, 220]
+  [M5, drawing]: &sp_min_2x
+    - [59, 68]
+    - [89, 80]
+    - [.inf, 100]
+  [M6, drawing]: *sp_min_2x
 
 # minimum wire spacing rule for same color wires.
-sp_sc_min:
-  1x:
-    w_list: [99, 749, 1499, .inf]
-    sp_list: [48, 72, 112, 220]
-  '4':
-    w_list: [99, 749, 1499, .inf]
-    sp_list: [48, 72, 112, 220]
-  2x:
-    w_list: [59, 89, .inf]
-    sp_list: [68, 80, 100]
+sp_sc_min: *sp_min_data
 
 # minimum line-end spacing rule.  Space is measured parallel to wire direction.
 sp_le_min:
-  1x:
-    w_list: [.inf]
-    sp_list: [64]
-  '4':
-    w_list: [.inf]
-    sp_list: [64]
-  2x:
-    w_list: [.inf]
-    sp_list: [74]
+  [M1, drawing]: &sp_le_min_1x
+    - [.inf, 64]
+  [M2, drawing]: *sp_le_min_1x
+  [M3, drawing]: *sp_le_min_1x
+  [M4, drawing]:
+    - [.inf, 64]
+  [M5, drawing]: &sp_le_min_2x
+    - [.inf, 74]
+  [M6, drawing]: *sp_le_min_2x
 
 # minimum length/minimum area rules.
 len_min:
-  1x:
-    w_list: [.inf]
-    w_al_list: [[6176, 10]]
-    md_list: [.inf]
-    md_al_list: [[6176, 10]]
-  '4':
-    w_list: [.inf]
-    w_al_list: [[6176, 10]]
-    md_list: [.inf]
-    md_al_list: [[6176, 10]]
-  2x:
-    w_list: [.inf]
-    w_al_list: [[8200, 10]]
-    md_list: [.inf]
-    md_al_list: [[8200, 10]]
+  [M1, drawing]: &len_min_1x
+    w_al_list:
+      - [.inf, 6176, 10]
+    md_al_list:
+      - [.inf, 6176, 10]
+  [M2, drawing]: *len_min_1x
+  [M3, drawing]: *len_min_1x
+  [M4, drawing]: *len_min_1x
+  [M5, drawing]: *len_min_1x
+  [M6, drawing]: *len_min_1x
+
 
 # DNW margin rules.
 dnw_margins:
