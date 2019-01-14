@@ -106,9 +106,14 @@ idc_em_scale:
     temp: [100, .inf]
     scale: [1.0, 0.5]
   # scale factor for this metal layer type
-  x:
+  ['M1', 'drawing']: &x_em_scale
     temp: [100, .inf]
     scale: [1.0, 0.5]
+  ['M2', 'drawing']: *x_em_scale
+  ['M3', 'drawing']: *x_em_scale
+  ['M4', 'drawing']: *x_em_scale
+  ['M5', 'drawing']: *x_em_scale
+  ['M6', 'drawing']: *x_em_scale
   # default scale vector
   default:
     temp: [100, .inf]
