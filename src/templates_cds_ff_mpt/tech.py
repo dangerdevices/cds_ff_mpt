@@ -92,6 +92,10 @@ class TechInfoCDSFFMPT(TechInfo):
                          adj_purpose: str, cut_w: int, cut_h: int, m_w: int = -1, m_l: int = -1,
                          adj_m_w: int = -1, adj_m_l: int = -1, array: bool = False,
                          dc_temp: int = -1000, rms_dt: int = -1000) -> Tuple[float, float, float]:
+        def_purpose = self.default_purpose
+        purpose = purpose or def_purpose
+        adj_purpose = adj_purpose or def_purpose
+
         lay_vec = [None, None]
         dim_vec = [None, None]
 
