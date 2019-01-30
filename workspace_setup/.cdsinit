@@ -57,7 +57,7 @@ let((skillPath)
 printf("END OF STANDARD CONFIG SETTINGS\n")
 
 ; set default editor
-editor = "/tools/projects/erichang/programs/core/bin/emacs"
+editor = "/usr/bin/vim"
 
 envLoadFile( "./.cdsenv" ) 
 
