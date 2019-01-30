@@ -18,7 +18,7 @@
 					<model enabled="1">cds_ff_mpt.scs
 						<modeltest>All</modeltest>
 						<modelblock>Global</modelblock>
-						<modelfile>/tools/cadence/GPDK/cds_ff_mpt_v_0.3/models/spectre/cds_ff_mpt.scs</modelfile>
+						<modelfile>/data/cadence/cds_ff_mpt_v_0.4/models/spectre/cds_ff_mpt.scs</modelfile>
 						<modelsection>"tt"</modelsection>
 					</model>
 				</models>
@@ -33,7 +33,7 @@
 					<model enabled="1">cds_ff_mpt.scs
 						<modeltest>All</modeltest>
 						<modelblock>Global</modelblock>
-						<modelfile>/tools/cadence/GPDK/cds_ff_mpt_v_0.3/models/spectre/cds_ff_mpt.scs</modelfile>
+						<modelfile>/data/cadence/cds_ff_mpt_v_0.4/models/spectre/cds_ff_mpt.scs</modelfile>
 						<modelsection>"ff"</modelsection>
 					</model>
 				</models>
@@ -48,7 +48,7 @@
 					<model enabled="1">cds_ff_mpt.scs
 						<modeltest>All</modeltest>
 						<modelblock>Global</modelblock>
-						<modelfile>/tools/cadence/GPDK/cds_ff_mpt_v_0.3/models/spectre/cds_ff_mpt.scs</modelfile>
+						<modelfile>/data/cadence/cds_ff_mpt_v_0.4/models/spectre/cds_ff_mpt.scs</modelfile>
 						<modelsection>"ss"</modelsection>
 					</model>
 				</models>
@@ -63,7 +63,7 @@
 					<model enabled="1">cds_ff_mpt.scs
 						<modeltest>All</modeltest>
 						<modelblock>Global</modelblock>
-						<modelfile>/tools/cadence/GPDK/cds_ff_mpt_v_0.3/models/spectre/cds_ff_mpt.scs</modelfile>
+						<modelfile>/data/cadence/cds_ff_mpt_v_0.4/models/spectre/cds_ff_mpt.scs</modelfile>
 						<modelsection>"sf"</modelsection>
 					</model>
 				</models>
@@ -78,7 +78,7 @@
 					<model enabled="1">cds_ff_mpt.scs
 						<modeltest>All</modeltest>
 						<modelblock>Global</modelblock>
-						<modelfile>/tools/cadence/GPDK/cds_ff_mpt_v_0.3/models/spectre/cds_ff_mpt.scs</modelfile>
+						<modelfile>/data/cadence/cds_ff_mpt_v_0.4/models/spectre/cds_ff_mpt.scs</modelfile>
 						<modelsection>"fs"</modelsection>
 					</model>
 				</models>
@@ -93,7 +93,7 @@
 					<model enabled="1">cds_ff_mpt.scs
 						<modeltest>All</modeltest>
 						<modelblock>Global</modelblock>
-						<modelfile>/tools/cadence/GPDK/cds_ff_mpt_v_0.3/models/spectre/cds_ff_mpt.scs</modelfile>
+						<modelfile>/data/cadence/cds_ff_mpt_v_0.4/models/spectre/cds_ff_mpt.scs</modelfile>
 						<modelsection>"ff"</modelsection>
 					</model>
 				</models>
@@ -108,7 +108,7 @@
 					<model enabled="1">cds_ff_mpt.scs
 						<modeltest>All</modeltest>
 						<modelblock>Global</modelblock>
-						<modelfile>/tools/cadence/GPDK/cds_ff_mpt_v_0.3/models/spectre/cds_ff_mpt.scs</modelfile>
+						<modelfile>/data/cadence/cds_ff_mpt_v_0.4/models/spectre/cds_ff_mpt.scs</modelfile>
 						<modelsection>"ss"</modelsection>
 					</model>
 				</models>
@@ -123,7 +123,7 @@
 					<model enabled="1">cds_ff_mpt.scs
 						<modeltest>All</modeltest>
 						<modelblock>Global</modelblock>
-						<modelfile>/tools/cadence/GPDK/cds_ff_mpt_v_0.3/models/spectre/cds_ff_mpt.scs</modelfile>
+						<modelfile>/data/cadence/cds_ff_mpt_v_0.4/models/spectre/cds_ff_mpt.scs</modelfile>
 						<modelsection>"ss"</modelsection>
 					</model>
 				</models>
