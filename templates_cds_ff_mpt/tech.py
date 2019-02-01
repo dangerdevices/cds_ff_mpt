@@ -15,7 +15,7 @@ class TechInfoCDSFFMPT(TechInfoConfig):
     def __init__(self, process_params):
         TechInfoConfig.__init__(self, _config, process_params)
 
-        process_params['layout']['mos_tech_class'] = MOSTechCDSFFMPT(_config, self)
+        process_params['layout']['mos_tech_class'] = MOSTechCDSFFMPT.__init__(_config, self)
         process_params['layout']['laygo_tech_class'] = None
         process_params['layout']['res_tech_class'] = None
 
