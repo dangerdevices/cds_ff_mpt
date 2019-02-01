@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
 # set BAG working directory
-export BAG_WORK_DIR=$(pwd)
+export BAG_WORK_DIR="/data/bag/BAG2_cds_ff_mpt"
 # set BAG framework directory
 export BAG_FRAMEWORK="/data/bag/BAG_framework"
 # set BAG python executable
