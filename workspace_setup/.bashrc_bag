@@ -1,13 +1,13 @@
 #! /usr/bin/env bash
 
 # set BAG working directory
-export BAG_WORK_DIR=$(pwd)
+export BAG_WORK_DIR="/data/bag/tutorial/vanilla/"
 # set BAG framework directory
-export BAG_FRAMEWORK="/data/bag/BAG_framework"
+export BAG_FRAMEWORK="${BAG_WORK_DIR}/BAG_framework"
 # set BAG python executable
-export BAG_PYTHON="/usr/bin/python3"
+export BAG_PYTHON="/data/python/anaconda3/bin/python3.6"
 # set jupyter notebook path
-export BAG_JUPYTER="/usr/bin/jupyter"
+export BAG_JUPYTER="/data/python/anaconda3/bin/jupyter"
 # set technology/project configuration directory
 export BAG_TECH_CONFIG_DIR="$BAG_WORK_DIR/cds_ff_mpt"
 # set where BAG saves temporary files
